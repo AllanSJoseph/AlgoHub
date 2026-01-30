@@ -4,7 +4,11 @@ import { Pause, Play } from 'lucide-react';
 
 
 const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
-
+  if (!secureUrl) {
+    return (
+      <p className="text-base-content/70">No video solution available for this problem yet.</p>
+    );
+  }
 
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);

@@ -36,12 +36,11 @@ const ProblemPage = () => {
       try {
         
         const response = await axiosClient.get(`/problem/problemById/${problemId}`);
-       
-        
-        const initialCode = response.data.startCode.find(sc => sc.language === langMap[selectedLanguage]).initialCode;
+        const data = response.data;
+        const startCodeEntry = data.startCode?.find(sc => sc.language === langMap[selectedLanguage]);
+        const initialCode = startCodeEntry?.initialCode ?? '// Write your code here';
 
-        setProblem(response.data);
-        
+        setProblem(data);
         setCode(initialCode);
         setLoading(false);
         
@@ -56,9 +55,9 @@ const ProblemPage = () => {
 
   // Update code when language changes
   useEffect(() => {
-    if (problem) {
-      const initialCode = problem.startCode.find(sc => sc.language === langMap[selectedLanguage]).initialCode;
-      setCode(initialCode);
+    if (problem?.startCode?.length) {
+      const startCodeEntry = problem.startCode.find(sc => sc.language === langMap[selectedLanguage]);
+      setCode(startCodeEntry?.initialCode ?? '// Write your code here');
     }
   }, [selectedLanguage, problem]);
 
@@ -239,18 +238,22 @@ const ProblemPage = () => {
                 <div>
                   <h2 className="text-xl font-bold mb-4">Solutions</h2>
                   <div className="space-y-6">
-                    {problem.referenceSolution?.map((solution, index) => (
-                      <div key={index} className="border border-base-300 rounded-lg">
-                        <div className="bg-base-200 px-4 py-2 rounded-t-lg">
-                          <h3 className="font-semibold">{problem?.title} - {solution?.language}</h3>
+                    {problem.referenceSolution?.length ? (
+                      problem.referenceSolution.map((solution, index) => (
+                        <div key={index} className="border border-base-300 rounded-lg">
+                          <div className="bg-base-200 px-4 py-2 rounded-t-lg">
+                            <h3 className="font-semibold">{problem?.title} - {solution?.language}</h3>
+                          </div>
+                          <div className="p-4">
+                            <pre className="bg-base-300 p-4 rounded text-sm overflow-x-auto">
+                              <code>{solution?.completeCode}</code>
+                            </pre>
+                          </div>
                         </div>
-                        <div className="p-4">
-                          <pre className="bg-base-300 p-4 rounded text-sm overflow-x-auto">
-                            <code>{solution?.completeCode}</code>
-                          </pre>
-                        </div>
-                      </div>
-                    )) || <p className="text-gray-500">Solutions will be available after you solve the problem.</p>}
+                      ))
+                    ) : (
+                      <p className="text-gray-500">No reference solutions available for this problem.</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -455,9 +458,12 @@ const ProblemPage = () => {
                       </div>
                     ) : (
                       <div>
-                        <h4 className="font-bold text-lg">❌ {submitResult.error}</h4>
+                        <h4 className="font-bold text-lg">❌ {submitResult.error || 'Wrong Answer'}</h4>
                         <div className="mt-4 space-y-2">
                           <p>Test Cases Passed: {submitResult.passedTestCases}/{submitResult.totalTestCases}</p>
+                          {submitResult.errorMessage && (
+                            <pre className="text-sm bg-base-300 p-2 rounded overflow-x-auto">{submitResult.errorMessage}</pre>
+                          )}
                         </div>
                       </div>
                     )}

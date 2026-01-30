@@ -19,18 +19,9 @@ const register = async (req,res)=>{
     //
     
      const user =  await User.create(req.body);
-     const token =  jwt.sign({_id:user._id , emailId:emailId, role:'user'},process.env.JWT_KEY,{expiresIn: 60*60});
-     const reply = {
-        firstName: user.firstName,
-        emailId: user.emailId,
-        _id: user._id,
-        role:user.role,
-    }
-    
-     res.cookie('token',token,{maxAge: 60*60*1000});
+     // Per requirement 2.1.1.2: User is redirected to Login Page after registration (no auto-login)
      res.status(201).json({
-        user:reply,
-        message:"Loggin Successfully"
+        message: "Registered successfully"
     })
     }
     catch(err){
@@ -50,8 +41,10 @@ const login = async (req,res)=>{
             throw new Error("Invalid Credentials");
 
         const user = await User.findOne({emailId});
+        if (!user)
+            throw new Error("Invalid Credentials");
 
-        const match = await bcrypt.compare(password,user.password);
+        const match = await bcrypt.compare(password, user.password);
 
         if(!match)
             throw new Error("Invalid Credentials");
@@ -85,13 +78,14 @@ const logout = async(req,res)=>{
         const payload = jwt.decode(token);
 
 
-        await redisClient.set(`token:${token}`,'Blocked');
-        await redisClient.expireAt(`token:${token}`,payload.exp);
-    //    Token add kar dung Redis ke blockList
-    //    Cookies ko clear kar dena.....
-
-    res.cookie("token",null,{expires: new Date(Date.now())});
-    res.send("Logged Out Succesfully");
+        try {
+            await redisClient.set(`token:${token}`, 'Blocked');
+            await redisClient.expireAt(`token:${token}`, payload.exp);
+        } catch (e) {
+            // Redis unavailable - logout still clears cookie
+        }
+        res.cookie("token", null, { expires: new Date(Date.now()) });
+        res.send("Logged Out Succesfully");
 
     }
     catch(err){
@@ -126,12 +120,7 @@ const deleteProfile = async(req,res)=>{
     try{
        const userId = req.result._id;
       
-    // userSchema delete
     await User.findByIdAndDelete(userId);
-
-    // Submission se bhi delete karo...
-    
-    // await Submission.deleteMany({userId});
     
     res.status(200).send("Deleted Successfully");
 
@@ -142,5 +131,27 @@ const deleteProfile = async(req,res)=>{
     }
 }
 
+// Admin: list all users (requirement 2.1.9.5)
+const getUsers = async (req, res) => {
+    try {
+        const users = await User.find({}).select('firstName emailId role _id createdAt').sort({ createdAt: -1 });
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).send("Internal Server Error");
+    }
+};
 
-module.exports = {register, login,logout,adminRegister,deleteProfile};
+// Admin: delete user by id (requirement 2.1.9.5)
+const deleteUserByAdmin = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (!userId) return res.status(400).send("User ID is required");
+        const deleted = await User.findByIdAndDelete(userId);
+        if (!deleted) return res.status(404).send("User not found");
+        res.status(200).send("User deleted successfully");
+    } catch (err) {
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+module.exports = {register, login,logout,adminRegister,deleteProfile, getUsers, deleteUserByAdmin};

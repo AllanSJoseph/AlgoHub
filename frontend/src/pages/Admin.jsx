@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Home, RefreshCw, Zap,Video } from 'lucide-react';
+import { Plus, Edit, Trash2, Video, UserMinus } from 'lucide-react';
 import { NavLink } from 'react-router';
 
 function Admin() {
@@ -18,7 +18,7 @@ function Admin() {
     {
       id: 'update',
       title: 'Update Problem',
-      description: 'Edit existing problems and their details',
+      description: 'Edit existing problems and their details (2.1.9.2)',
       icon: Edit,
       color: 'btn-warning',
       bgColor: 'bg-warning/10',
@@ -41,6 +41,15 @@ function Admin() {
       color: 'btn-success',
       bgColor: 'bg-success/10',
       route: '/admin/video'
+    },
+    {
+      id: 'users',
+      title: 'Delete User',
+      description: 'Remove user accounts from the system (2.1.9.5)',
+      icon: UserMinus,
+      color: 'btn-error',
+      bgColor: 'bg-error/10',
+      route: '/admin/users'
     }
   ];
 

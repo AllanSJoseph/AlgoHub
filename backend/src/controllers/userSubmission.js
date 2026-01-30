@@ -99,13 +99,15 @@ const submitCode = async (req,res)=>{
       await req.result.save();
     }
     
-    const accepted = (status == 'accepted')
+    const accepted = (status == 'accepted');
     res.status(201).json({
       accepted,
       totalTestCases: submittedResult.testCasesTotal,
       passedTestCases: testCasesPassed,
       runtime,
-      memory
+      memory,
+      error: accepted ? undefined : (status === 'error' ? 'Runtime/Compilation Error' : 'Wrong Answer'),
+      errorMessage: accepted ? undefined : errorMessage
     });
        
     }

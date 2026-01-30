@@ -16,7 +16,7 @@ function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useSelector((state) => state.auth); // Removed error as it wasn't used
+  const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
 
   const {
     register,
@@ -31,19 +31,28 @@ function Signup() {
   }, [isAuthenticated, navigate]);
 
   const onSubmit = (data) => {
-    dispatch(registerUser(data));
+    dispatch(registerUser(data)).then((result) => {
+      if (registerUser.fulfilled.match(result)) {
+        navigate('/login');
+      }
+    });
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-base-200"> {/* Added a light bg for contrast */}
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title justify-center text-3xl mb-6">Leetcode</h2> {/* Added mb-6 for spacing */}
+          <h2 className="card-title justify-center text-3xl mb-6">AlgoHub</h2>
+          {error && (
+            <div className="alert alert-error text-sm mb-4">
+              <span>{typeof error === 'string' ? error.replace(/^Error:\s*/i, '') : 'Registration failed'}</span>
+            </div>
+          )}
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* First Name Field */}
+            {/* Username field (requirement 2.1.1.2: username, email, password) */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text">First Name</span>
+                <span className="label-text">Username</span>
               </label>
               <input
                 type="text"
