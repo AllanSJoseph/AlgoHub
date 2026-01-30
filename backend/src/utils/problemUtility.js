@@ -17,16 +17,27 @@ const getLanguageById = (lang)=>{
 const submitBatch = async (submissions)=>{
 
 
+// const options = {
+//   method: 'POST',
+//   url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+//   params: {
+//     base64_encoded: 'false'
+//   },
+//   headers: {
+//     'x-rapidapi-key': process.env.JUDGE0_KEY,
+//     'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+//     'Content-Type': 'application/json'
+//   },
+//   data: {
+//     submissions
+//   }
+// };
+
 const options = {
   method: 'POST',
-  url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+  url: 'http://localhost:2358/submissions/batch',
   params: {
     base64_encoded: 'false'
-  },
-  headers: {
-    'x-rapidapi-key': process.env.JUDGE0_KEY,
-    'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
-    'Content-Type': 'application/json'
   },
   data: {
     submissions
@@ -59,7 +70,7 @@ const submitToken = async(resultToken)=>{
 
 const options = {
   method: 'GET',
-  url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+  url: 'http://localhost:2358/submissions/batch',
   params: {
     tokens: resultToken.join(","),
     base64_encoded: 'false',
