@@ -79,7 +79,7 @@ function Homepage() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
             <h1 className="text-3xl lg:text-5xl font-black mt-2">
-              AlgoHub. Practice algorithms the right way.
+              AlgoHub. Practice the algorithms.
             </h1>
             <p className="mt-3 max-w-2xl font-medium">
               Solve problems, ship clean solutions, and level up with editorials

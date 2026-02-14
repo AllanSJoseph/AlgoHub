@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -8,12 +8,14 @@ function Layout() {
   const location = useLocation();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const hideChrome = location.pathname === "/login" || location.pathname === "/signup";
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem("theme") || "brutal"
-  );
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem("theme");
+    return stored === "brutal" || stored === "brutal-dark" ? stored : "brutal";
+  });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    document.body.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 

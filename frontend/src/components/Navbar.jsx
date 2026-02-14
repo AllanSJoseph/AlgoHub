@@ -85,12 +85,21 @@ function Navbar({ theme, onToggleTheme }) {
 
       <div className="navbar-end">
         <button
-          className="btn btn-ghost btn-circle"
+          className="theme-switch"
+          data-checked={theme === "brutal-dark"}
           onClick={toggleTheme}
           aria-label="Toggle theme"
+          aria-checked={theme === "brutal-dark"}
+          role="switch"
           type="button"
         >
-          {theme === "brutal" ? <Moon size={18} /> : <Sun size={18} />}
+          <span className="theme-icon theme-icon-left">
+            <Sun size={12} />
+          </span>
+          <span className="theme-icon theme-icon-right">
+            <Moon size={12} />
+          </span>
+          <span className="theme-knob" />
         </button>
         {isAuthenticated ? (
           <div className="dropdown dropdown-end">

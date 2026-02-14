@@ -76,7 +76,7 @@ function Login() {
                 />
                 <button
                   type="button"
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/60 hover:text-base-content"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >

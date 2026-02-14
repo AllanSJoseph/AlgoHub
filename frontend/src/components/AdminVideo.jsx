@@ -102,7 +102,7 @@ const AdminVideo = () => {
                   <div className="flex space-x-2">
                      <NavLink 
                         to={`/admin/upload/${problem._id}`}
-                        className="btn btn-sm bg-blue-600 text-white"
+                        className="btn btn-sm btn-primary"
                         >
                         Upload
                     </NavLink>

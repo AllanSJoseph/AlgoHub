@@ -155,7 +155,7 @@ const ProblemPage = () => {
       case 'easy': return 'text-green-500';
       case 'medium': return 'text-yellow-500';
       case 'hard': return 'text-red-500';
-      default: return 'text-gray-500';
+      default: return 'text-base-content/60';
     }
   };
 
@@ -273,7 +273,7 @@ const ProblemPage = () => {
                         </div>
                       ))
                     ) : (
-                      <p className="text-gray-500">Solutions will be available after you solve the problem.</p>
+                      <p className="text-base-content/60">Solutions will be available after you solve the problem.</p>
                     )}
                   </div>
                 </div>
@@ -282,7 +282,7 @@ const ProblemPage = () => {
               {activeLeftTab === 'submissions' && (
                 <div>
                   <h2 className="text-xl font-bold mb-4">My Submissions</h2>
-                  <div className="text-gray-500">
+                  <div className="text-base-content/60">
                     <SubmissionHistory problemId={problemId} />
                   </div>
                 </div>
@@ -431,7 +431,7 @@ const ProblemPage = () => {
                               </div>
                             </div>
                           )) : (
-                            <div className="text-sm text-gray-500">No test cases returned.</div>
+                            <div className="text-sm text-base-content/60">No test cases returned.</div>
                           )}
                         </div>
                       </div>
@@ -454,7 +454,7 @@ const ProblemPage = () => {
                               </div>
                             </div>
                           )) : (
-                            <div className="text-sm text-gray-500">No test cases returned.</div>
+                            <div className="text-sm text-base-content/60">No test cases returned.</div>
                           )}
                         </div>
                       </div>
@@ -462,7 +462,7 @@ const ProblemPage = () => {
                   </div>
                 </div>
               ) : (
-                <div className="text-gray-500">
+                <div className="text-base-content/60">
                   Click "Run" to test your code with the example test cases.
                 </div>
               )}
@@ -495,7 +495,7 @@ const ProblemPage = () => {
                   </div>
                 </div>
               ) : (
-                <div className="text-gray-500">
+                <div className="text-base-content/60">
                   Click "Submit" to submit your solution for evaluation.
                 </div>
               )}
