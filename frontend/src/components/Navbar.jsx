@@ -1,21 +1,12 @@
 import { NavLink, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { logoutUser } from "../authSlice";
 
-function Navbar() {
+function Navbar({ theme, onToggleTheme }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem("theme") || "brutal"
-  );
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
   const initials = user?.firstName
     ? user.firstName.slice(0, 2).toUpperCase()
@@ -27,7 +18,7 @@ function Navbar() {
   };
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "brutal" ? "brutal-dark" : "brutal"));
+    onToggleTheme?.();
   };
 
   return (

@@ -16,8 +16,9 @@ const langMap = {
 const getDraftKey = (problemId, language) => `draft_${problemId}_${language}`;
 
 const getInitialCode = (problemData, language) => {
+  const target = langMap[language]?.toLowerCase();
   const entry = problemData?.startCode?.find(
-    (sc) => sc.language === langMap[language]
+    (sc) => sc.language?.toLowerCase() === target
   );
   return entry?.initialCode || '';
 };
@@ -48,11 +49,12 @@ const ProblemPage = () => {
        
        
         const saved = localStorage.getItem(getDraftKey(problemId, selectedLanguage));
-        const initialCode = saved ?? getInitialCode(response.data, selectedLanguage);
+        const initialCode = getInitialCode(response.data, selectedLanguage);
+        const codeToSet = saved && saved.length > 0 ? saved : initialCode;
 
         setProblem(response.data);
         
-        setCode(initialCode);
+        setCode(codeToSet);
         setLoading(false);
         
       } catch (error) {
@@ -68,13 +70,14 @@ const ProblemPage = () => {
   useEffect(() => {
     if (problem) {
       const saved = localStorage.getItem(getDraftKey(problemId, selectedLanguage));
-      const initialCode = saved ?? getInitialCode(problem, selectedLanguage);
-      setCode(initialCode);
+      const initialCode = getInitialCode(problem, selectedLanguage);
+      const codeToSet = saved && saved.length > 0 ? saved : initialCode;
+      setCode(codeToSet);
     }
   }, [selectedLanguage, problem, problemId]);
 
   useEffect(() => {
-    if (!problemId) return;
+    if (!problemId || !problem) return;
     localStorage.setItem(getDraftKey(problemId, selectedLanguage), code);
   }, [code, problemId, selectedLanguage]);
 
