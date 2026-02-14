@@ -65,6 +65,7 @@ const createProblem = async (req,res)=>{
       res.status(201).send("Problem Saved Successfully");
     }
     catch(err){
+        console.log(err);
         res.status(400).send("Error: "+err);
     }
 }
@@ -109,7 +110,7 @@ const updateProblem = async (req,res)=>{
 
 
       const submitResult = await submitBatch(submissions);
-      // console.log(submitResult);
+      console.log(`Submit Result: ${submitResult}`);
 
       const resultToken = submitResult.map((value)=> value.token);
 
@@ -117,7 +118,7 @@ const updateProblem = async (req,res)=>{
       
      const testResult = await submitToken(resultToken);
 
-    //  console.log(testResult);
+    console.log(`Test Result: ${testResult}`);
 
      for(const test of testResult){
       if(test.status_id!=3){

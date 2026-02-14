@@ -10,7 +10,7 @@ const register = async (req,res)=>{
     
     try{
         // validate the data;
-
+        console.log(req.body);
       validate(req.body); 
       const {firstName, emailId, password}  = req.body;
 
@@ -34,9 +34,13 @@ const register = async (req,res)=>{
     })
     }
     catch(err){
-        res.status(400).send("Error: "+err);
+        // res.status(400).send("Error: "+ err);
+        console.error(err);
+        res.status(400).json(
+            {message: err.message || "Invalid SignUp Data"}
+        );
     }
-}
+};
 
 
 const login = async (req,res)=>{

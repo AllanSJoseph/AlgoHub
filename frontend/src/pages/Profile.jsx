@@ -4,7 +4,7 @@ import axiosClient from "../utils/axiosClient";
 import { NavLink } from "react-router";
 
 const getDraftLanguageStats = () => {
-  const stats = { javascript: 0, java: 0, cpp: 0 };
+  const stats = { javascript: 0, java: 0, cpp: 0, python: 0 };
   for (let i = 0; i < localStorage.length; i += 1) {
     const key = localStorage.key(i);
     if (!key || !key.startsWith("draft_")) continue;
@@ -179,6 +179,10 @@ function Profile() {
               <div className="flex items-center justify-between">
                 <span>C++</span>
                 <span className="font-mono">{draftStats.cpp}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Python</span>
+                <span className="font-mono">{draftStats.python}</span>
               </div>
             </div>
           </div>

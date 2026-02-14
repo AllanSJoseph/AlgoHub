@@ -9,7 +9,8 @@ import Editorial from '../components/Editorial';
 const langMap = {
         cpp: 'C++',
         java: 'Java',
-        javascript: 'JavaScript'
+        javascript: 'JavaScript',
+        python: 'Python'
 };
 
 const getDraftKey = (problemId, language) => `draft_${problemId}_${language}`;
@@ -144,6 +145,7 @@ const ProblemPage = () => {
       case 'javascript': return 'javascript';
       case 'java': return 'java';
       case 'cpp': return 'cpp';
+      case 'python': return 'python';
       default: return 'javascript';
     }
   };
@@ -330,13 +332,13 @@ const ProblemPage = () => {
               {/* Language Selector */}
               <div className="flex justify-between items-center p-4 border-b border-base-300">
                 <div className="flex gap-2">
-                  {['javascript', 'java', 'cpp'].map((lang) => (
+                  {['javascript', 'java', 'cpp', 'python'].map((lang) => (
                     <button
                       key={lang}
                       className={`btn btn-sm ${selectedLanguage === lang ? 'btn-primary' : 'btn-ghost'}`}
                       onClick={() => handleLanguageChange(lang)}
                     >
-                      {lang === 'cpp' ? 'C++' : lang === 'javascript' ? 'JavaScript' : 'Java'}
+                      {lang === 'cpp' ? 'C++' : lang === 'javascript' ? 'JavaScript' : lang === 'java' ? 'Java' : 'Python'}
                     </button>
                   ))}
                 </div>
