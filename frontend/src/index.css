@@ -3,49 +3,49 @@
 @plugin "daisyui";
 
 [data-theme="brutal"] {
-  --p: 180 100% 45%;
-  --pc: 0 0% 10%;
-  --s: 45 100% 50%;
-  --sc: 0 0% 10%;
-  --a: 330 100% 50%;
-  --ac: 0 0% 10%;
-  --n: 0 0% 10%;
+  --p: 210 90% 52%;
+  --pc: 0 0% 100%;
+  --s: 160 60% 45%;
+  --sc: 0 0% 100%;
+  --a: 330 70% 52%;
+  --ac: 0 0% 100%;
+  --n: 220 20% 18%;
   --nc: 0 0% 98%;
-  --b1: 0 0% 96%;
-  --b2: 0 0% 92%;
-  --b3: 0 0% 88%;
-  --bc: 0 0% 10%;
-  --rounded-box: 0;
-  --rounded-btn: 0;
-  --rounded-badge: 0;
-  --border-btn: 2px;
-  --border-box: 2px;
+  --b1: 0 0% 100%;
+  --b2: 0 0% 98%;
+  --b3: 0 0% 94%;
+  --bc: 220 20% 15%;
+  --rounded-box: 0.5rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 9999px;
+  --border-btn: 1px;
+  --border-box: 1px;
   --animation-btn: 0;
   --animation-input: 0;
-  --btn-text-case: uppercase;
+  --btn-text-case: normal;
 }
 
 [data-theme="brutal-dark"] {
-  --p: 180 100% 50%;
-  --pc: 0 0% 10%;
-  --s: 45 100% 50%;
-  --sc: 0 0% 10%;
-  --a: 330 100% 50%;
-  --ac: 0 0% 10%;
+  --p: 200 90% 60%;
+  --pc: 220 25% 12%;
+  --s: 160 55% 48%;
+  --sc: 220 25% 12%;
+  --a: 330 75% 58%;
+  --ac: 220 25% 12%;
   --n: 0 0% 95%;
-  --nc: 0 0% 10%;
-  --b1: 0 0% 10%;
-  --b2: 0 0% 14%;
-  --b3: 0 0% 18%;
-  --bc: 0 0% 95%;
-  --rounded-box: 0;
-  --rounded-btn: 0;
-  --rounded-badge: 0;
-  --border-btn: 2px;
-  --border-box: 2px;
+  --nc: 220 20% 12%;
+  --b1: 220 18% 12%;
+  --b2: 220 16% 16%;
+  --b3: 220 14% 20%;
+  --bc: 0 0% 96%;
+  --rounded-box: 0.5rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 9999px;
+  --border-btn: 1px;
+  --border-box: 1px;
   --animation-btn: 0;
   --animation-input: 0;
-  --btn-text-case: uppercase;
+  --btn-text-case: normal;
 }
 
 @layer base {
@@ -56,6 +56,24 @@
   body {
     background: hsl(var(--b1));
     color: hsl(var(--bc));
+  }
+
+  .bg-base-100,
+  .bg-base-200,
+  .bg-base-300 {
+    color: hsl(var(--bc));
+  }
+
+  .bg-primary {
+    color: hsl(var(--pc));
+  }
+
+  .bg-secondary {
+    color: hsl(var(--sc));
+  }
+
+  .bg-accent {
+    color: hsl(var(--ac));
   }
 
   code,
@@ -80,8 +98,7 @@
   .tabs,
   .tab,
   .dropdown-content {
-    border: 2px solid hsl(var(--bc));
-    border-radius: 0;
+    border: 1px solid hsl(var(--b3));
   }
 
   .navbar,
@@ -90,48 +107,45 @@
   .modal-box,
   .alert,
   .dropdown-content {
-    box-shadow: 6px 6px 0 hsl(var(--bc));
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   }
 
   .btn,
   .input,
   .select,
   .textarea {
-    box-shadow: 4px 4px 0 hsl(var(--bc));
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    box-shadow: none;
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
 
   .btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 6px 6px 0 hsl(var(--bc));
+    transform: translateY(-1px);
   }
 
   .badge {
-    border: 2px solid hsl(var(--bc));
-    border-radius: 0;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    border: 1px solid hsl(var(--b3));
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
   .tabs {
-    border-bottom: 0;
+    border-bottom: 1px solid hsl(var(--b3));
   }
 
   .tab {
-    border-bottom: 2px solid hsl(var(--bc));
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    border-bottom: 2px solid transparent;
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
   .tab-active {
-    border-bottom-width: 4px;
+    border-bottom-color: hsl(var(--bc));
   }
 
   .progress {
-    height: 0.75rem;
-    border: 2px solid hsl(var(--bc));
-    border-radius: 0;
+    height: 0.5rem;
+    border: 1px solid hsl(var(--b3));
   }
 }

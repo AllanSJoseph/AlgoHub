@@ -71,18 +71,15 @@ function Homepage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative overflow-hidden p-8 lg:p-12 mb-10 bg-secondary text-base-content border-2 border-base-content shadow-[8px_8px_0_rgba(0,0,0,1)]"
+        className="relative overflow-hidden p-8 lg:p-12 mb-10 bg-base-100 border border-base-300 shadow-sm"
       >
-        <div className="absolute -top-10 -right-10 h-24 w-24 bg-primary border-2 border-base-content"></div>
-        <div className="absolute -bottom-12 -left-12 h-28 w-28 bg-accent border-2 border-base-content"></div>
+        <div className="absolute -top-10 -right-10 h-24 w-24 bg-primary/10 border border-base-300"></div>
+        <div className="absolute -bottom-12 -left-12 h-28 w-28 bg-accent/10 border border-base-300"></div>
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <p className="uppercase tracking-widest text-xs">
-              Brutal focus mode
-            </p>
             <h1 className="text-3xl lg:text-5xl font-black mt-2">
-              AlgoHub. Algorithms without the fluff.
+              AlgoHub. Practice algorithms the right way.
             </h1>
             <p className="mt-3 max-w-2xl font-medium">
               Solve problems, ship clean solutions, and level up with editorials
@@ -98,21 +95,21 @@ function Homepage() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 w-full lg:w-auto">
-            <div className="bg-base-100 border-2 border-base-content p-4 shadow-[4px_4px_0_rgba(0,0,0,1)]">
+            <div className="bg-base-200 border border-base-300 p-4 shadow-sm">
               <div className="text-2xl font-bold">{problems.length}</div>
-              <div className="text-xs uppercase">Total problems</div>
+              <div className="text-xs uppercase tracking-wide">Total problems</div>
             </div>
-            <div className="bg-base-100 border-2 border-base-content p-4 shadow-[4px_4px_0_rgba(0,0,0,1)]">
+            <div className="bg-base-200 border border-base-300 p-4 shadow-sm">
               <div className="text-2xl font-bold">{solvedProblems.length}</div>
-              <div className="text-xs uppercase">Solved</div>
+              <div className="text-xs uppercase tracking-wide">Solved</div>
             </div>
-            <div className="bg-base-100 border-2 border-base-content p-4 shadow-[4px_4px_0_rgba(0,0,0,1)]">
+            <div className="bg-base-200 border border-base-300 p-4 shadow-sm">
               <div className="text-2xl font-bold">{filters.tag}</div>
-              <div className="text-xs uppercase">Current tag</div>
+              <div className="text-xs uppercase tracking-wide">Current tag</div>
             </div>
-            <div className="bg-base-100 border-2 border-base-content p-4 shadow-[4px_4px_0_rgba(0,0,0,1)]">
+            <div className="bg-base-200 border border-base-300 p-4 shadow-sm">
               <div className="text-2xl font-bold">{filters.difficulty}</div>
-              <div className="text-xs uppercase">Difficulty</div>
+              <div className="text-xs uppercase tracking-wide">Difficulty</div>
             </div>
           </div>
         </div>
