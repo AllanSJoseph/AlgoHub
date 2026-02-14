@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axiosClient from '../utils/axiosClient'
 import { NavLink } from 'react-router';
+import { toast } from 'react-hot-toast';
 
 const AdminVideo = () => {
   const [problems, setProblems] = useState([]);
@@ -26,14 +27,14 @@ const AdminVideo = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this problem?')) return;
+    if (!window.confirm('Are you sure you want to delete this video?')) return;
     
     try {
       await axiosClient.delete(`/video/delete/${id}`);
-      setProblems(problems.filter(problem => problem._id !== id));
+      toast.success('Video deleted');
     } catch (err) {
-      setError(err);
       console.log(err);
+      toast.error(err.response?.data?.error || 'Failed to delete video');
     }
   };
 
@@ -53,7 +54,7 @@ const AdminVideo = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>{error.response.data.error}</span>
+          <span>{typeof error === 'string' ? error : error.response?.data?.error || 'Failed to load videos'}</span>
         </div>
       </div>
     );
@@ -83,9 +84,9 @@ const AdminVideo = () => {
                 <td>{problem.title}</td>
                 <td>
                   <span className={`badge ${
-                    problem.difficulty === 'Easy' 
+                    problem.difficulty?.toLowerCase() === 'easy' 
                       ? 'badge-success' 
-                      : problem.difficulty === 'Medium' 
+                      : problem.difficulty?.toLowerCase() === 'medium' 
                         ? 'badge-warning' 
                         : 'badge-error'
                   }`}>
@@ -98,17 +99,13 @@ const AdminVideo = () => {
                   </span>
                 </td>
                 <td>
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-2">
                      <NavLink 
                         to={`/admin/upload/${problem._id}`}
-                        className={`btn bg-blue-600`}
+                        className="btn btn-sm bg-blue-600 text-white"
                         >
                         Upload
                     </NavLink>
-                  </div>
-                </td>
-                <td>
-                  <div className="flex space-x-2">
                     <button 
                       onClick={() => handleDelete(problem._id)}
                       className="btn btn-sm btn-error"

@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, NavLink } from 'react-router'; 
-import { loginUser } from "../authSlice";
+import { clearError, loginUser } from "../authSlice";
 import { useEffect, useState } from 'react';
 
 
@@ -24,10 +24,11 @@ function Login() {
   } = useForm({ resolver: zodResolver(loginSchema) }); // Using renamed schema
 
   useEffect(() => {
+    dispatch(clearError());
     if (isAuthenticated) {
       navigate('/');
     }
-  }, [isAuthenticated, navigate]);
+  }, [dispatch, isAuthenticated, navigate]);
 
   const onSubmit = (data) => {
     dispatch(loginUser(data));
@@ -37,7 +38,13 @@ function Login() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-base-200"> {/* Added bg for contrast */}
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title justify-center text-3xl mb-6">Leetcode</h2> {/* Added mb-6 */}
+          <h2 className="card-title justify-center text-3xl mb-6">AlgoHub</h2> {/* Added mb-6 */}
+
+          {error && (
+            <div className="alert alert-error mb-4">
+              <span>{error}</span>
+            </div>
+          )}
 
           
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -63,7 +70,7 @@ function Login() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="********"
                   className={`input input-bordered w-full pr-10 ${errors.password ? 'input-error' : ''}`}
                   {...register('password')}
                 />

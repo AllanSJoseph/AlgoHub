@@ -1,6 +1,6 @@
 # 🧠 AlgoHub – Online Coding Platform
 
-AlgoHub is a full-stack LeetCode-style coding platform built with the **MERN stack** (MongoDB, Express.js, React.js, Node.js). It supports **multi-language code execution** using the **Judge0 API**, features **JWT authentication**, **Redis caching**, and includes **video integration** for enhanced learning.
+AlgoHub is a full-stack AlgoHub-style coding platform built with the **MERN stack** (MongoDB, Express.js, React.js, Node.js). It supports **multi-language code execution** using the **Judge0 API**, features **JWT authentication**, **Redis caching**, and includes **video integration** for enhanced learning.
 
 ---
 

@@ -11,6 +11,10 @@ import Admin from "./pages/Admin";
 import AdminVideo from "./components/AdminVideo"
 import AdminDelete from "./components/AdminDelete"
 import AdminUpload from "./components/AdminUpload"
+import ProtectedRoute from "./components/ProtectedRoute";
+import { Toaster } from "react-hot-toast";
+import Layout from "./components/Layout";
+import Profile from "./pages/Profile";
 
 function App(){
   
@@ -30,17 +34,20 @@ function App(){
 
   return(
   <>
+    <Toaster position="top-right" />
     <Routes>
-      <Route path="/" element={isAuthenticated ?<Homepage></Homepage>:<Navigate to="/signup" />}></Route>
-      <Route path="/login" element={isAuthenticated?<Navigate to="/" />:<Login></Login>}></Route>
-      <Route path="/signup" element={isAuthenticated?<Navigate to="/" />:<Signup></Signup>}></Route>
-      <Route path="/admin" element={isAuthenticated && user?.role === 'admin' ? <Admin /> : <Navigate to="/" />} />
-      <Route path="/admin/create" element={isAuthenticated && user?.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
-      <Route path="/admin/delete" element={isAuthenticated && user?.role === 'admin' ? <AdminDelete /> : <Navigate to="/" />} />
-      <Route path="/admin/video" element={isAuthenticated && user?.role === 'admin' ? <AdminVideo /> : <Navigate to="/" />} />
-      <Route path="/admin/upload/:problemId" element={isAuthenticated && user?.role === 'admin' ? <AdminUpload /> : <Navigate to="/" />} />
-      <Route path="/problem/:problemId" element={<ProblemPage/>}></Route>
-      
+      <Route element={<Layout />}>
+        <Route path="/" element={isAuthenticated ?<Homepage></Homepage>:<Navigate to="/signup" />}></Route>
+        <Route path="/login" element={isAuthenticated?<Navigate to="/" />:<Login></Login>}></Route>
+        <Route path="/signup" element={isAuthenticated?<Navigate to="/" />:<Signup></Signup>}></Route>
+        <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
+        <Route path="/admin/create" element={<ProtectedRoute requireAdmin><AdminPanel /></ProtectedRoute>} />
+        <Route path="/admin/delete" element={<ProtectedRoute requireAdmin><AdminDelete /></ProtectedRoute>} />
+        <Route path="/admin/video" element={<ProtectedRoute requireAdmin><AdminVideo /></ProtectedRoute>} />
+        <Route path="/admin/upload/:problemId" element={<ProtectedRoute requireAdmin><AdminUpload /></ProtectedRoute>} />
+        <Route path="/problem/:problemId" element={<ProtectedRoute><ProblemPage/></ProtectedRoute>}></Route>
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      </Route>
     </Routes>
   </>
   )

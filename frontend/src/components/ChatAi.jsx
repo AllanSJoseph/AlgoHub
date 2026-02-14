@@ -17,21 +17,19 @@ function ChatAi({problem}) {
     }, [messages]);
 
     const onSubmit = async (data) => {
-        
-        setMessages(prev => [...prev, { role: 'user', parts:[{text: data.message}] }]);
+        const newMessages = [...messages, { role: 'user', parts:[{text: data.message}] }];
+        setMessages(newMessages);
         reset();
 
         try {
-            
             const response = await axiosClient.post("/ai/chat", {
-                messages:messages,
+                messages:newMessages,
                 title:problem.title,
                 description:problem.description,
                 testCases: problem.visibleTestCases,
                 startCode:problem.startCode
             });
 
-           
             setMessages(prev => [...prev, { 
                 role: 'model', 
                 parts:[{text: response.data.message}] 

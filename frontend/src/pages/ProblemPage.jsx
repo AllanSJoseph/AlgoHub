@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useForm } from 'react-hook-form';
 import Editor from '@monaco-editor/react';
 import { useParams } from 'react-router';
 import axiosClient from "../utils/axiosClient"
@@ -11,6 +10,15 @@ const langMap = {
         cpp: 'C++',
         java: 'Java',
         javascript: 'JavaScript'
+};
+
+const getDraftKey = (problemId, language) => `draft_${problemId}_${language}`;
+
+const getInitialCode = (problemData, language) => {
+  const entry = problemData?.startCode?.find(
+    (sc) => sc.language === langMap[language]
+  );
+  return entry?.initialCode || '';
 };
 
 
@@ -26,9 +34,9 @@ const ProblemPage = () => {
   const editorRef = useRef(null);
   let {problemId}  = useParams();
 
+  const runTestCases = runResult?.testCases || [];
+  const hasRunTestCases = runTestCases.length > 0;
   
-
-  const { handleSubmit } = useForm();
 
  useEffect(() => {
     const fetchProblem = async () => {
@@ -37,8 +45,9 @@ const ProblemPage = () => {
         
         const response = await axiosClient.get(`/problem/problemById/${problemId}`);
        
-        
-        const initialCode = response.data.startCode.find(sc => sc.language === langMap[selectedLanguage]).initialCode;
+       
+        const saved = localStorage.getItem(getDraftKey(problemId, selectedLanguage));
+        const initialCode = saved ?? getInitialCode(response.data, selectedLanguage);
 
         setProblem(response.data);
         
@@ -57,10 +66,16 @@ const ProblemPage = () => {
   // Update code when language changes
   useEffect(() => {
     if (problem) {
-      const initialCode = problem.startCode.find(sc => sc.language === langMap[selectedLanguage]).initialCode;
+      const saved = localStorage.getItem(getDraftKey(problemId, selectedLanguage));
+      const initialCode = saved ?? getInitialCode(problem, selectedLanguage);
       setCode(initialCode);
     }
-  }, [selectedLanguage, problem]);
+  }, [selectedLanguage, problem, problemId]);
+
+  useEffect(() => {
+    if (!problemId) return;
+    localStorage.setItem(getDraftKey(problemId, selectedLanguage), code);
+  }, [code, problemId, selectedLanguage]);
 
   const handleEditorChange = (value) => {
     setCode(value || '');
@@ -148,9 +163,9 @@ const ProblemPage = () => {
   }
 
   return (
-    <div className="h-screen flex bg-base-100">
+    <div className="min-h-screen lg:h-screen flex flex-col lg:flex-row bg-base-100">
       {/* Left Panel */}
-      <div className="w-1/2 flex flex-col border-r border-base-300">
+      <div className="w-full lg:w-1/2 flex flex-col border-b lg:border-b-0 lg:border-r border-base-300">
         {/* Left Tabs */}
         <div className="tabs tabs-bordered bg-base-200 px-4">
           <button 
@@ -211,7 +226,7 @@ const ProblemPage = () => {
                   <div className="mt-8">
                     <h3 className="text-lg font-semibold mb-4">Examples:</h3>
                     <div className="space-y-4">
-                      {problem.visibleTestCases.map((example, index) => (
+                      {problem.visibleTestCases?.map((example, index) => (
                         <div key={index} className="bg-base-200 p-4 rounded-lg">
                           <h4 className="font-semibold mb-2">Example {index + 1}:</h4>
                           <div className="space-y-2 text-sm font-mono">
@@ -239,18 +254,22 @@ const ProblemPage = () => {
                 <div>
                   <h2 className="text-xl font-bold mb-4">Solutions</h2>
                   <div className="space-y-6">
-                    {problem.referenceSolution?.map((solution, index) => (
-                      <div key={index} className="border border-base-300 rounded-lg">
-                        <div className="bg-base-200 px-4 py-2 rounded-t-lg">
-                          <h3 className="font-semibold">{problem?.title} - {solution?.language}</h3>
+                    {problem.referenceSolution && problem.referenceSolution.length > 0 ? (
+                      problem.referenceSolution.map((solution, index) => (
+                        <div key={index} className="border border-base-300 rounded-lg">
+                          <div className="bg-base-200 px-4 py-2 rounded-t-lg">
+                            <h3 className="font-semibold">{problem?.title} - {solution?.language}</h3>
+                          </div>
+                          <div className="p-4">
+                            <pre className="bg-base-300 p-4 rounded text-sm overflow-x-auto">
+                              <code>{solution?.completeCode}</code>
+                            </pre>
+                          </div>
                         </div>
-                        <div className="p-4">
-                          <pre className="bg-base-300 p-4 rounded text-sm overflow-x-auto">
-                            <code>{solution?.completeCode}</code>
-                          </pre>
-                        </div>
-                      </div>
-                    )) || <p className="text-gray-500">Solutions will be available after you solve the problem.</p>}
+                      ))
+                    ) : (
+                      <p className="text-gray-500">Solutions will be available after you solve the problem.</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -278,7 +297,7 @@ const ProblemPage = () => {
       </div>
 
       {/* Right Panel */}
-      <div className="w-1/2 flex flex-col">
+      <div className="w-full lg:w-1/2 flex flex-col">
         {/* Right Tabs */}
         <div className="tabs tabs-bordered bg-base-200 px-4">
           <button 
@@ -321,7 +340,7 @@ const ProblemPage = () => {
               </div>
 
               {/* Monaco Editor */}
-              <div className="flex-1">
+              <div className="flex-1 min-h-[320px] h-[50vh] lg:h-auto">
                 <Editor
                   height="100%"
                   language={getLanguageForMonaco(selectedLanguage)}
@@ -390,41 +409,48 @@ const ProblemPage = () => {
                   <div>
                     {runResult.success ? (
                       <div>
-                        <h4 className="font-bold">✅ All test cases passed!</h4>
+                        <h4 className="font-bold">All test cases passed!</h4>
                         <p className="text-sm mt-2">Runtime: {runResult.runtime+" sec"}</p>
                         <p className="text-sm">Memory: {runResult.memory+" KB"}</p>
                         
                         <div className="mt-4 space-y-2">
-                          {runResult.testCases.map((tc, i) => (
+                          {hasRunTestCases ? runTestCases.map((tc, i) => (
                             <div key={i} className="bg-base-100 p-3 rounded text-xs">
                               <div className="font-mono">
                                 <div><strong>Input:</strong> {tc.stdin}</div>
                                 <div><strong>Expected:</strong> {tc.expected_output}</div>
                                 <div><strong>Output:</strong> {tc.stdout}</div>
                                 <div className={'text-green-600'}>
-                                  {'✓ Passed'}
+                                  {'Passed'}
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          )) : (
+                            <div className="text-sm text-gray-500">No test cases returned.</div>
+                          )}
                         </div>
                       </div>
                     ) : (
                       <div>
-                        <h4 className="font-bold">❌ Error</h4>
+                        <h4 className="font-bold">Error</h4>
+                        {runResult.error && (
+                          <p className="text-sm mt-2">{runResult.error}</p>
+                        )}
                         <div className="mt-4 space-y-2">
-                          {runResult.testCases.map((tc, i) => (
+                          {hasRunTestCases ? runTestCases.map((tc, i) => (
                             <div key={i} className="bg-base-100 p-3 rounded text-xs">
                               <div className="font-mono">
                                 <div><strong>Input:</strong> {tc.stdin}</div>
                                 <div><strong>Expected:</strong> {tc.expected_output}</div>
                                 <div><strong>Output:</strong> {tc.stdout}</div>
                                 <div className={tc.status_id==3 ? 'text-green-600' : 'text-red-600'}>
-                                  {tc.status_id==3 ? '✓ Passed' : '✗ Failed'}
+                                  {tc.status_id==3 ? 'Passed' : 'Failed'}
                                 </div>
                               </div>
                             </div>
-                          ))}
+                          )) : (
+                            <div className="text-sm text-gray-500">No test cases returned.</div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -446,7 +472,7 @@ const ProblemPage = () => {
                   <div>
                     {submitResult.accepted ? (
                       <div>
-                        <h4 className="font-bold text-lg">🎉 Accepted</h4>
+                        <h4 className="font-bold text-lg">Accepted</h4>
                         <div className="mt-4 space-y-2">
                           <p>Test Cases Passed: {submitResult.passedTestCases}/{submitResult.totalTestCases}</p>
                           <p>Runtime: {submitResult.runtime + " sec"}</p>
@@ -455,7 +481,7 @@ const ProblemPage = () => {
                       </div>
                     ) : (
                       <div>
-                        <h4 className="font-bold text-lg">❌ {submitResult.error}</h4>
+                        <h4 className="font-bold text-lg">Error: {submitResult.error}</h4>
                         <div className="mt-4 space-y-2">
                           <p>Test Cases Passed: {submitResult.passedTestCases}/{submitResult.totalTestCases}</p>
                         </div>

@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axiosClient from '../utils/axiosClient';
 import { useNavigate } from 'react-router';
+import { toast } from 'react-hot-toast';
 
 // Zod schema matching the problem schema
 const problemSchema = z.object({
@@ -47,6 +48,8 @@ function AdminPanel() {
   } = useForm({
     resolver: zodResolver(problemSchema),
     defaultValues: {
+      visibleTestCases: [{ input: '', output: '', explanation: '' }],
+      hiddenTestCases: [{ input: '', output: '' }],
       startCode: [
         { language: 'C++', initialCode: '' },
         { language: 'Java', initialCode: '' },
@@ -81,10 +84,10 @@ function AdminPanel() {
   const onSubmit = async (data) => {
     try {
       await axiosClient.post('/problem/create', data);
-      alert('Problem created successfully!');
+      toast.success('Problem created successfully');
       navigate('/');
     } catch (error) {
-      alert(`Error: ${error.response?.data?.message || error.message}`);
+      toast.error(error.response?.data?.message || error.message || 'Failed to create problem');
     }
   };
 
@@ -204,6 +207,9 @@ function AdminPanel() {
                 />
               </div>
             ))}
+            {errors.visibleTestCases && (
+              <span className="text-error">{errors.visibleTestCases.message}</span>
+            )}
           </div>
 
           {/* Hidden Test Cases */}
@@ -244,6 +250,9 @@ function AdminPanel() {
                 />
               </div>
             ))}
+            {errors.hiddenTestCases && (
+              <span className="text-error">{errors.hiddenTestCases.message}</span>
+            )}
           </div>
         </div>
 
@@ -257,6 +266,17 @@ function AdminPanel() {
                 <h3 className="font-medium">
                   {index === 0 ? 'C++' : index === 1 ? 'Java' : 'JavaScript'}
                 </h3>
+
+                <input
+                  type="hidden"
+                  {...register(`startCode.${index}.language`)}
+                  defaultValue={index === 0 ? 'C++' : index === 1 ? 'Java' : 'JavaScript'}
+                />
+                <input
+                  type="hidden"
+                  {...register(`referenceSolution.${index}.language`)}
+                  defaultValue={index === 0 ? 'C++' : index === 1 ? 'Java' : 'JavaScript'}
+                />
                 
                 <div className="form-control">
                   <label className="label">
