@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axiosClient from '../utils/axiosClient'
+import { toast } from 'react-hot-toast';
 
 const AdminDelete = () => {
   const [problems, setProblems] = useState([]);
@@ -30,9 +31,10 @@ const AdminDelete = () => {
     try {
       await axiosClient.delete(`/problem/delete/${id}`);
       setProblems(problems.filter(problem => problem._id !== id));
+      toast.success('Problem deleted');
     } catch (err) {
-      setError('Failed to delete problem');
       console.error(err);
+      toast.error('Failed to delete problem');
     }
   };
 
@@ -82,9 +84,9 @@ const AdminDelete = () => {
                 <td>{problem.title}</td>
                 <td>
                   <span className={`badge ${
-                    problem.difficulty === 'Easy' 
+                    problem.difficulty?.toLowerCase() === 'easy' 
                       ? 'badge-success' 
-                      : problem.difficulty === 'Medium' 
+                      : problem.difficulty?.toLowerCase() === 'medium' 
                         ? 'badge-warning' 
                         : 'badge-error'
                   }`}>

@@ -111,7 +111,7 @@ const SubmissionHistory = ({ problemId }) => {
                     <td>{formatDate(sub.createdAt)}</td>
                     <td>
                       <button 
-                        className="btn btn-s btn-outline"
+                        className="btn btn-sm btn-outline"
                         onClick={() => setSelectedSubmission(sub)}
                       >
                         Code

@@ -1,2 +1,137 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 @plugin "daisyui";
+
+[data-theme="brutal"] {
+  --p: 180 100% 45%;
+  --pc: 0 0% 10%;
+  --s: 45 100% 50%;
+  --sc: 0 0% 10%;
+  --a: 330 100% 50%;
+  --ac: 0 0% 10%;
+  --n: 0 0% 10%;
+  --nc: 0 0% 98%;
+  --b1: 0 0% 96%;
+  --b2: 0 0% 92%;
+  --b3: 0 0% 88%;
+  --bc: 0 0% 10%;
+  --rounded-box: 0;
+  --rounded-btn: 0;
+  --rounded-badge: 0;
+  --border-btn: 2px;
+  --border-box: 2px;
+  --animation-btn: 0;
+  --animation-input: 0;
+  --btn-text-case: uppercase;
+}
+
+[data-theme="brutal-dark"] {
+  --p: 180 100% 50%;
+  --pc: 0 0% 10%;
+  --s: 45 100% 50%;
+  --sc: 0 0% 10%;
+  --a: 330 100% 50%;
+  --ac: 0 0% 10%;
+  --n: 0 0% 95%;
+  --nc: 0 0% 10%;
+  --b1: 0 0% 10%;
+  --b2: 0 0% 14%;
+  --b3: 0 0% 18%;
+  --bc: 0 0% 95%;
+  --rounded-box: 0;
+  --rounded-btn: 0;
+  --rounded-badge: 0;
+  --border-btn: 2px;
+  --border-box: 2px;
+  --animation-btn: 0;
+  --animation-input: 0;
+  --btn-text-case: uppercase;
+}
+
+@layer base {
+  html {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+  }
+
+  body {
+    background: hsl(var(--b1));
+    color: hsl(var(--bc));
+  }
+
+  code,
+  pre,
+  .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+      Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+}
+
+@layer components {
+  .navbar,
+  .footer,
+  .card,
+  .btn,
+  .input,
+  .select,
+  .textarea,
+  .table,
+  .modal-box,
+  .alert,
+  .tabs,
+  .tab,
+  .dropdown-content {
+    border: 2px solid hsl(var(--bc));
+    border-radius: 0;
+  }
+
+  .navbar,
+  .footer,
+  .card,
+  .modal-box,
+  .alert,
+  .dropdown-content {
+    box-shadow: 6px 6px 0 hsl(var(--bc));
+  }
+
+  .btn,
+  .input,
+  .select,
+  .textarea {
+    box-shadow: 4px 4px 0 hsl(var(--bc));
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 6px 6px 0 hsl(var(--bc));
+  }
+
+  .badge {
+    border: 2px solid hsl(var(--bc));
+    border-radius: 0;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .tabs {
+    border-bottom: 0;
+  }
+
+  .tab {
+    border-bottom: 2px solid hsl(var(--bc));
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .tab-active {
+    border-bottom-width: 4px;
+  }
+
+  .progress {
+    height: 0.75rem;
+    border: 2px solid hsl(var(--bc));
+    border-radius: 0;
+  }
+}
