@@ -118,6 +118,8 @@ const updateProblem = async (req,res)=>{
       
      const testResult = await submitToken(resultToken);
 
+     console.log(testResult);
+
     console.log(`Test Result: ${testResult}`);
 
      for(const test of testResult){
@@ -169,7 +171,7 @@ const getProblemById = async(req,res)=>{
     if(!id)
       return res.status(400).send("ID is Missing");
 
-    const getProblem = await Problem.findById(id).select('_id title description difficulty tags visibleTestCases startCode referenceSolution ');
+    const getProblem = await Problem.findById(id).select('_id title description difficulty tags visibleTestCases hiddenTestCases startCode referenceSolution ');
    
     // video ka jo bhi url wagera le aao
 

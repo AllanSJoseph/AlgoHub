@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, Video } from 'lucide-react';
+import { Plus, Edit, Trash2, Video } from 'lucide-react';
 import { NavLink } from 'react-router';
 
 function Admin() {
@@ -12,6 +12,15 @@ function Admin() {
       color: 'btn-success',
       bgColor: 'bg-success/10',
       route: '/admin/create'
+    },
+    {
+      id: 'update',
+      title: 'Update Problem',
+      description: 'Edit existing problems and their details.',
+      icon: Edit,
+      color: 'btn-warning',
+      bgColor: 'bg-warning/10',
+      route: '/admin/update'
     },
     {
       id: 'delete',

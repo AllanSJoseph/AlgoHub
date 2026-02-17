@@ -8,9 +8,11 @@ import { useEffect } from "react";
 import AdminPanel from "./components/AdminPanel";
 import ProblemPage from "./pages/ProblemPage"
 import Admin from "./pages/Admin";
-import AdminVideo from "./components/AdminVideo"
-import AdminDelete from "./components/AdminDelete"
-import AdminUpload from "./components/AdminUpload"
+import AdminVideo from "./components/AdminVideo";
+import AdminUpdate from "./components/AdminUpdate";
+import UpdateProblem from "./components/UpdateProblem";
+import AdminDelete from "./components/AdminDelete";
+import AdminUpload from "./components/AdminUpload";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
 import Layout from "./components/Layout";
@@ -42,6 +44,8 @@ function App(){
         <Route path="/signup" element={isAuthenticated?<Navigate to="/" />:<Signup></Signup>}></Route>
         <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
         <Route path="/admin/create" element={<ProtectedRoute requireAdmin><AdminPanel /></ProtectedRoute>} />
+        <Route path="/admin/update" element={<ProtectedRoute requireAdmin><AdminUpdate /></ProtectedRoute>} />
+        <Route path="/admin/update/:problemId" element={<ProtectedRoute requireAdmin><UpdateProblem /></ProtectedRoute>} />
         <Route path="/admin/delete" element={<ProtectedRoute requireAdmin><AdminDelete /></ProtectedRoute>} />
         <Route path="/admin/video" element={<ProtectedRoute requireAdmin><AdminVideo /></ProtectedRoute>} />
         <Route path="/admin/upload/:problemId" element={<ProtectedRoute requireAdmin><AdminUpload /></ProtectedRoute>} />
