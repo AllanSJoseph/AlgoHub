@@ -15,7 +15,7 @@ const langMap = {
 
 const getDraftKey = (problemId, language) => `draft_${problemId}_${language}`;
 
-const getInitialCode = (problemData, language) => {
+const getFullCode = (problemData, language) => {
   const target = langMap[language]?.toLowerCase();
   const entry = problemData?.startCode?.find(
     (sc) => sc.language?.toLowerCase() === target
@@ -23,11 +23,97 @@ const getInitialCode = (problemData, language) => {
   return entry?.initialCode || '';
 };
 
+const LOGIC_MARKERS = [
+  "Write your logic here",
+  "Write your code here",
+  "TODO"
+];
+
+const findMarkerIndex = (code) => {
+  for (const marker of LOGIC_MARKERS) {
+    const idx = code.indexOf(marker);
+    if (idx !== -1) return idx;
+  }
+  return -1;
+};
+
+const extractBraceFunction = (code, markerIndex) => {
+  const startBrace = code.lastIndexOf("{", markerIndex);
+  if (startBrace === -1) return null;
+  const lineStart = code.lastIndexOf("\n", startBrace);
+  const start = lineStart === -1 ? 0 : lineStart + 1;
+
+  let depth = 0;
+  for (let i = startBrace; i < code.length; i++) {
+    const ch = code[i];
+    if (ch === "{") depth++;
+    if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        const end = i + 1;
+        return { start, end, visible: code.slice(start, end) };
+      }
+    }
+  }
+  return null;
+};
+
+const extractPythonFunction = (code, markerIndex) => {
+  const lines = code.split("\n");
+  let lineIndex = 0;
+  let charCount = 0;
+  for (; lineIndex < lines.length; lineIndex++) {
+    const lineLen = lines[lineIndex].length + 1;
+    if (charCount + lineLen > markerIndex) break;
+    charCount += lineLen;
+  }
+
+  let defIndex = -1;
+  for (let i = lineIndex; i >= 0; i--) {
+    const trimmed = lines[i].trimStart();
+    if (trimmed.startsWith("def ") || trimmed.startsWith("async def ")) {
+      defIndex = i;
+      break;
+    }
+  }
+  if (defIndex === -1) return null;
+
+  const defIndent = lines[defIndex].match(/^\s*/)?.[0].length ?? 0;
+  let endIndex = lines.length;
+  for (let i = defIndex + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+    const indent = line.match(/^\s*/)?.[0].length ?? 0;
+    if (indent <= defIndent) {
+      endIndex = i;
+      break;
+    }
+  }
+
+  const start = lines.slice(0, defIndex).join("\n").length + (defIndex === 0 ? 0 : 1);
+  const end = lines.slice(0, endIndex).join("\n").length;
+  return { start, end, visible: code.slice(start, end) };
+};
+
+const extractVisibleCode = (fullCode, language) => {
+  if (!fullCode) return null;
+  const normalized = fullCode.replace(/\r\n/g, "\n");
+  const markerIndex = findMarkerIndex(normalized);
+  if (markerIndex === -1) return null;
+  if (language === "python") {
+    return extractPythonFunction(normalized, markerIndex);
+  }
+  return extractBraceFunction(normalized, markerIndex);
+};
+
 
 const ProblemPage = () => {
   const [problem, setProblem] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   const [code, setCode] = useState('');
+  const [fullCode, setFullCode] = useState('');
+  const [codeRegion, setCodeRegion] = useState(null);
+  const [showFullCode, setShowFullCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [runResult, setRunResult] = useState(null);
   const [submitResult, setSubmitResult] = useState(null);
@@ -49,11 +135,19 @@ const ProblemPage = () => {
        
        
         const saved = localStorage.getItem(getDraftKey(problemId, selectedLanguage));
-        const initialCode = getInitialCode(response.data, selectedLanguage);
-        const codeToSet = saved && saved.length > 0 ? saved : initialCode;
+        const initialFullCode = getFullCode(response.data, selectedLanguage);
+        const normalizedFullCode = initialFullCode.replace(/\r\n/g, "\n");
+        const extracted = extractVisibleCode(normalizedFullCode, selectedLanguage);
+        const normalizedSaved = saved ? saved.replace(/\r\n/g, "\n") : null;
+        const savedExtracted = normalizedSaved ? extractVisibleCode(normalizedSaved, selectedLanguage) : null;
+        const visibleDefault = extracted?.visible || normalizedFullCode;
+        const codeToSet = saved && saved.length > 0
+          ? (savedExtracted?.visible || saved)
+          : visibleDefault;
 
         setProblem(response.data);
-        
+        setFullCode(normalizedFullCode);
+        setCodeRegion(extracted ? { start: extracted.start, end: extracted.end } : null);
         setCode(codeToSet);
         setLoading(false);
         
@@ -70,8 +164,17 @@ const ProblemPage = () => {
   useEffect(() => {
     if (problem) {
       const saved = localStorage.getItem(getDraftKey(problemId, selectedLanguage));
-      const initialCode = getInitialCode(problem, selectedLanguage);
-      const codeToSet = saved && saved.length > 0 ? saved : initialCode;
+      const initialFullCode = getFullCode(problem, selectedLanguage);
+      const normalizedFullCode = initialFullCode.replace(/\r\n/g, "\n");
+      const extracted = extractVisibleCode(normalizedFullCode, selectedLanguage);
+      const normalizedSaved = saved ? saved.replace(/\r\n/g, "\n") : null;
+      const savedExtracted = normalizedSaved ? extractVisibleCode(normalizedSaved, selectedLanguage) : null;
+      const visibleDefault = extracted?.visible || normalizedFullCode;
+      const codeToSet = saved && saved.length > 0
+        ? (savedExtracted?.visible || saved)
+        : visibleDefault;
+      setFullCode(normalizedFullCode);
+      setCodeRegion(extracted ? { start: extracted.start, end: extracted.end } : null);
       setCode(codeToSet);
     }
   }, [selectedLanguage, problem, problemId]);
@@ -79,7 +182,7 @@ const ProblemPage = () => {
   useEffect(() => {
     if (!problemId || !problem) return;
     localStorage.setItem(getDraftKey(problemId, selectedLanguage), code);
-  }, [code, problemId, selectedLanguage]);
+  }, [code, problemId, selectedLanguage, problem]);
 
   const handleEditorChange = (value) => {
     setCode(value || '');
@@ -98,8 +201,12 @@ const ProblemPage = () => {
     setRunResult(null);
     
     try {
+      const mergedCode = codeRegion
+        ? fullCode.slice(0, codeRegion.start) + code + fullCode.slice(codeRegion.end)
+        : code;
+
       const response = await axiosClient.post(`/submission/run/${problemId}`, {
-        code,
+        code: mergedCode,
         language: selectedLanguage
       });
 
@@ -123,8 +230,12 @@ const ProblemPage = () => {
     setSubmitResult(null);
     
     try {
+        const mergedCode = codeRegion
+          ? fullCode.slice(0, codeRegion.start) + code + fullCode.slice(codeRegion.end)
+          : code;
+
         const response = await axiosClient.post(`/submission/submit/${problemId}`, {
-        code:code,
+        code: mergedCode,
         language: selectedLanguage
       });
 
@@ -342,6 +453,18 @@ const ProblemPage = () => {
                     </button>
                   ))}
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    className={`btn btn-sm ${showFullCode ? 'btn-primary' : 'btn-ghost'}`}
+                    onClick={() => setShowFullCode((prev) => !prev)}
+                    type="button"
+                  >
+                    {showFullCode ? 'Hide full code' : 'Show full code'}
+                  </button>
+                  <span className="text-xs text-base-content/60">
+                    {showFullCode ? 'Read-only view' : 'Function only'}
+                  </span>
+                </div>
               </div>
 
               {/* Monaco Editor */}
@@ -349,8 +472,8 @@ const ProblemPage = () => {
                 <Editor
                   height="100%"
                   language={getLanguageForMonaco(selectedLanguage)}
-                  value={code}
-                  onChange={handleEditorChange}
+                  value={showFullCode ? (fullCode || code) : code}
+                  onChange={showFullCode ? undefined : handleEditorChange}
                   onMount={handleEditorDidMount}
                   theme="vs-dark"
                   options={{
@@ -369,7 +492,7 @@ const ProblemPage = () => {
                     renderLineHighlight: 'line',
                     selectOnLineNumbers: true,
                     roundedSelection: false,
-                    readOnly: false,
+                    readOnly: showFullCode,
                     cursorStyle: 'line',
                     mouseWheelZoom: true,
                   }}
