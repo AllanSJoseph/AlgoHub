@@ -6,14 +6,15 @@ import axios from 'axios';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-hot-toast';
 import AdminProblemAssistant from './AdminProblemAssistant';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { TAG_OPTIONS } from '../constants/tagOptions';
 
 // Zod schema matching the problem schema
 const problemSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
   difficulty: z.enum(['easy', 'medium', 'hard']),
-  tags: z.array(z.enum(['array', 'linkedList', 'graph', 'dp'])).min(1, 'At least one tag is required'),
+  tags: z.array(z.enum(TAG_OPTIONS)).min(1, 'At least one tag is required'),
   constraints: z.string().optional(),
   inputFormat: z.string().optional(),
   outputFormat: z.string().optional(),
@@ -46,40 +47,46 @@ const problemSchema = z.object({
 
 function AdminPanel() {
   const navigate = useNavigate();
+  const languages = ['C++', 'Java', 'JavaScript', 'Python'];
   const [videoSource, setVideoSource] = useState('none');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [localVideoFile, setLocalVideoFile] = useState(null);
   const [videoSaving, setVideoSaving] = useState(false);
-  const availableTags = ['array', 'linkedList', 'graph', 'dp'];
+  const [tagFilter, setTagFilter] = useState('');
+  const draftKey = 'admin_problem_draft_create';
+
+  const defaultValues = {
+    tags: [],
+    constraints: '',
+    inputFormat: '',
+    outputFormat: '',
+    visibleTestCases: [{ input: '', output: '', explanation: '' }],
+    hiddenTestCases: [{ input: '', output: '' }],
+    startCode: [
+      { language: 'C++', initialCode: '' },
+      { language: 'Java', initialCode: '' },
+      { language: 'JavaScript', initialCode: '' },
+      { language: 'Python', initialCode: '' }
+    ],
+    referenceSolution: [
+      { language: 'C++', completeCode: '' },
+      { language: 'Java', completeCode: '' },
+      { language: 'JavaScript', completeCode: '' },
+      { language: 'Python', completeCode: '' }
+    ]
+  };
   const {
     register,
     control,
     handleSubmit,
     setValue,
     getValues,
-    formState: { errors }
+    watch,
+    reset,
+    formState: { errors, isSubmitting }
   } = useForm({
     resolver: zodResolver(problemSchema),
-    defaultValues: {
-      tags: [],
-      constraints: '',
-      inputFormat: '',
-      outputFormat: '',
-      visibleTestCases: [{ input: '', output: '', explanation: '' }],
-      hiddenTestCases: [{ input: '', output: '' }],
-      startCode: [
-        { language: 'C++', initialCode: '' },
-        { language: 'Java', initialCode: '' },
-        { language: 'JavaScript', initialCode: '' },
-        { language: 'Python', initialCode: '' }
-      ],
-      referenceSolution: [
-        { language: 'C++', completeCode: '' },
-        { language: 'Java', completeCode: '' },
-        { language: 'JavaScript', completeCode: '' },
-        { language: 'Python', completeCode: '' }
-      ]
-    }
+    defaultValues
   });
 
   const {
@@ -102,6 +109,33 @@ function AdminPanel() {
     name: 'hiddenTestCases'
   });
 
+  const selectedTags = watch('tags') || [];
+  const allTagsSelected = TAG_OPTIONS.every((tag) => selectedTags.includes(tag));
+  const filteredTags = TAG_OPTIONS.filter((tag) =>
+    tag.toLowerCase().includes(tagFilter.trim().toLowerCase())
+  );
+
+  useEffect(() => {
+    const saved = localStorage.getItem(draftKey);
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed?.value) {
+        reset({ ...defaultValues, ...parsed.value });
+        toast.success('Draft restored');
+      }
+    } catch {
+      // ignore malformed drafts
+    }
+  }, [reset]);
+
+  useEffect(() => {
+    const subscription = watch((value) => {
+      localStorage.setItem(draftKey, JSON.stringify({ value, savedAt: Date.now() }));
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
   const onSubmit = async (data) => {
     console.log('Form data submitted:', data);
     try {
@@ -111,6 +145,7 @@ function AdminPanel() {
       if (problemId) {
         await handleVideoSave(problemId);
       }
+      localStorage.removeItem(draftKey);
       toast.success('Problem created successfully');
       navigate('/');
     } catch (error) {
@@ -158,15 +193,10 @@ function AdminPanel() {
       <h1 className="text-3xl font-bold mb-6">Create New Problem</h1>
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <AdminProblemAssistant
-          getValues={getValues}
-          setValue={setValue}
-          replaceVisible={replaceVisible}
-          replaceHidden={replaceHidden}
-        />
-
-        {/* Basic Information */}
-        <div className="card bg-base-100 shadow-lg p-6">
+        <div className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <div className="card bg-base-100 shadow-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
           <div className="space-y-4">
             <div className="form-control">
@@ -214,8 +244,29 @@ function AdminPanel() {
                 <label className="label">
                   <span className="label-text">Tags</span>
                 </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={tagFilter}
+                    onChange={(e) => setTagFilter(e.target.value)}
+                    placeholder="Search tags"
+                    className="input input-bordered input-sm flex-1"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-outline"
+                    onClick={() =>
+                      setValue('tags', allTagsSelected ? [] : TAG_OPTIONS, {
+                        shouldValidate: true,
+                        shouldDirty: true
+                      })
+                    }
+                  >
+                    {allTagsSelected ? 'Clear' : 'Select All'}
+                  </button>
+                </div>
                 <div className={`grid grid-cols-2 gap-2 border rounded-lg p-3 ${errors.tags ? 'border-error' : 'border-base-300'}`}>
-                  {availableTags.map((tag) => (
+                  {filteredTags.map((tag) => (
                     <label key={tag} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
@@ -223,7 +274,7 @@ function AdminPanel() {
                         {...register('tags')}
                         className="checkbox checkbox-primary checkbox-sm"
                       />
-                      <span className="capitalize">{tag.replace('linkedList', 'linked list')}</span>
+                      <span className="capitalize">{tag.replace(/-/g, ' ').replace('linkedList', 'linked list')}</span>
                     </label>
                   ))}
                 </div>
@@ -372,21 +423,21 @@ function AdminPanel() {
           <h2 className="text-xl font-semibold mb-4">Code Templates</h2>
           
           <div className="space-y-6">
-            {[0, 1, 2, 3].map((index) => (
+            {languages.map((lang, index) => (
               <div key={index} className="space-y-2">
                 <h3 className="font-medium">
-                  {index === 0 ? 'C++' : index === 1 ? 'Java' : index === 2 ? 'JavaScript' : "Python"}
+                  {lang}
                 </h3>
 
                 <input
                   type="hidden"
                   {...register(`startCode.${index}.language`)}
-                  defaultValue={index === 0 ? 'C++' : index === 1 ? 'Java' : 'JavaScript'}
+                  defaultValue={lang}
                 />
                 <input
                   type="hidden"
                   {...register(`referenceSolution.${index}.language`)}
-                  defaultValue={index === 0 ? 'C++' : index === 1 ? 'Java' : 'JavaScript'}
+                  defaultValue={lang}
                 />
                 
                 <div className="form-control">
@@ -494,9 +545,24 @@ function AdminPanel() {
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary w-full" >
-          Create Problem
+        <button
+          type="submit"
+          className={`btn btn-primary w-full ${(isSubmitting || videoSaving) ? 'loading' : ''}`}
+          disabled={isSubmitting || videoSaving}
+        >
+          {isSubmitting || videoSaving ? 'Saving...' : 'Create Problem'}
         </button>
+          </div>
+
+          <div className="lg:sticky lg:top-6">
+            <AdminProblemAssistant
+              getValues={getValues}
+              setValue={setValue}
+              replaceVisible={replaceVisible}
+              replaceHidden={replaceHidden}
+            />
+          </div>
+        </div>
       </form>
     </div>
   );

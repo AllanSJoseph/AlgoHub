@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
+const { TAG_OPTIONS } = require('../constants/tagOptions');
 
 const problemSchema = new Schema({
     title:{
@@ -17,7 +18,7 @@ const problemSchema = new Schema({
     },
     tags:{
         type:[String],
-        enum:['array','linkedList','graph','dp'],
+        enum: TAG_OPTIONS,
         required:true,
         validate:{
             validator:(value)=> Array.isArray(value) && value.length > 0,

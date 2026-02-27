@@ -47,6 +47,56 @@ function Roadmap() {
     }
   };
 
+  const handleDownload = () => {
+    if (!roadmapData) return;
+    const printWindow = window.open('', '_blank', 'width=900,height=900');
+    if (!printWindow) return;
+
+    const roadmapHtml = `
+      <html>
+        <head>
+          <title>${roadmapData.title || 'Roadmap'}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 24px; color: #1f2937; }
+            h1 { font-size: 24px; margin-bottom: 8px; }
+            h2 { font-size: 18px; margin-top: 24px; }
+            h3 { font-size: 16px; margin: 16px 0 8px; }
+            .muted { color: #6b7280; font-size: 12px; }
+            .phase { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+            ul, ol { margin: 6px 0 12px 18px; }
+          </style>
+        </head>
+        <body>
+          <h1>${roadmapData.title || 'Roadmap'}</h1>
+          <div class="muted">${roadmapData.roleOrSubject || ''}</div>
+          <p>${roadmapData.summary || ''}</p>
+          ${(roadmapData.roadmap || [])
+            .map((phase, idx) => `
+              <div class="phase">
+                <h3>${phase.phase || `Phase ${idx + 1}`}</h3>
+                <div class="muted">${phase.duration || ''}</div>
+                ${phase.focus?.length ? `<strong>Focus</strong><ul>${phase.focus.map((item) => `<li>${item}</li>`).join('')}</ul>` : ''}
+                ${phase.topics?.length ? `<strong>Topics</strong><ul>${phase.topics.map((item) => `<li>${item}</li>`).join('')}</ul>` : ''}
+                ${phase.projects?.length ? `<strong>Projects</strong><ul>${phase.projects.map((item) => `<li>${item}</li>`).join('')}</ul>` : ''}
+                ${phase.milestones?.length ? `<strong>Milestones</strong><ul>${phase.milestones.map((item) => `<li>${item}</li>`).join('')}</ul>` : ''}
+              </div>
+            `)
+            .join('')}
+          ${(roadmapData.interviewQuestions || []).length ? `
+            <h2>Interview Questions</h2>
+            <ol>${roadmapData.interviewQuestions.map((q) => `<li>${q}</li>`).join('')}</ol>
+          ` : ''}
+        </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(roadmapHtml);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <section className="relative overflow-hidden bg-base-100 border border-base-300 shadow-lg p-8">
@@ -115,15 +165,20 @@ function Roadmap() {
       {roadmapData && (
         <section className="space-y-6">
           <div className="card bg-base-100 shadow-lg p-6">
-            <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-2xl font-bold">
-                {roadmapData.title || 'Your Roadmap'}
-              </h2>
-              {roadmapData.roleOrSubject && (
-                <span className="badge badge-primary badge-outline">
-                  {roadmapData.roleOrSubject}
-                </span>
-              )}
+            <div className="flex flex-wrap items-center gap-3 justify-between">
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="text-2xl font-bold">
+                  {roadmapData.title || 'Your Roadmap'}
+                </h2>
+                {roadmapData.roleOrSubject && (
+                  <span className="badge badge-primary badge-outline">
+                    {roadmapData.roleOrSubject}
+                  </span>
+                )}
+              </div>
+              <button type="button" className="btn btn-sm btn-outline" onClick={handleDownload}>
+                Download PDF
+              </button>
             </div>
             {roadmapData.summary && (
               <p className="mt-3 text-base-content/80">

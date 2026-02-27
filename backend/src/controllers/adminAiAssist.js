@@ -2,6 +2,7 @@
 const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
+const { TAG_OPTIONS } = require("../constants/tagOptions");
 
 // const model = genAI.({
 //     model: "gemini-3-flash-preview",
@@ -50,7 +51,7 @@ You MUST return a strictly valid JSON object with this exact top-level schema an
 
 Rules:
 - difficulty must be one of: "easy", "medium", "hard".
-- tags must be an array chosen from: "array", "linkedList", "graph", "dp".
+- tags must be an array chosen from: ${TAG_OPTIONS.join(", ")}.
 - visibleTestCases should include objects with: { "input": "", "output": "", "explanation": "" }.
 - hiddenTestCases should include objects with: { "input": "", "output": "" }.
 - improvements must be an array of concise strings.
@@ -195,9 +196,15 @@ const suggestCodeTemplates = async (req, res) => {
     Note: For 'referenceSolution', the user section should contain the actual logic instead of a comment.
         `
 
-        const result = await model.generateContent(prompt);
+        const result = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: prompt,
+            config: {
+                systemInstruction: systemInstruction
+            }
+        });
 
-        const responseText = result.response.text();
+        const responseText = result.text;
 
         const cleanJson = responseText.replace(/```json|```/g, "").trim();
         const suggestions = JSON.parse(cleanJson);

@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router';
 import { toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import AdminProblemAssistant from './AdminProblemAssistant';
+import { TAG_OPTIONS } from '../constants/tagOptions';
 
 function UpdateProblem() {
     const [loading, setLoading] = useState(false);
@@ -16,9 +17,12 @@ function UpdateProblem() {
     const [localVideoFile, setLocalVideoFile] = useState(null);
     const [videoSaving, setVideoSaving] = useState(false);
     const [existingVideo, setExistingVideo] = useState(null);
-    const availableTags = ['array', 'linkedList', 'graph', 'dp'];
+    const [tagFilter, setTagFilter] = useState('');
+    const [draftData, setDraftData] = useState(null);
+    const [showDraftPrompt, setShowDraftPrompt] = useState(false);
     let { problemId } = useParams();
     const languages = ['C++', 'Java', 'JavaScript', 'Python'];
+    const draftKey = `admin_problem_draft_update_${problemId}`;
 
 
     const normalizeProblem = (problem) => ({
@@ -46,7 +50,8 @@ function UpdateProblem() {
         reset,
         getValues,
         setValue,
-        formState: { errors }
+        watch,
+        formState: { errors, isSubmitting }
     } = useForm({
         resolver: zodResolver(problemSchema),
         defaultValues: {
@@ -91,11 +96,18 @@ function UpdateProblem() {
         name: 'hiddenTestCases'
     });
 
+    const selectedTags = watch('tags') || [];
+    const allTagsSelected = TAG_OPTIONS.every((tag) => selectedTags.includes(tag));
+    const filteredTags = TAG_OPTIONS.filter((tag) =>
+      tag.toLowerCase().includes(tagFilter.trim().toLowerCase())
+    );
+
     const onSubmit = async (data) => {
         console.log('Form data submitted:', data);
         try {
         await axiosClient.put(`/problem/update/${problemId}`, data);
         await handleVideoSave(problemId);
+        localStorage.removeItem(draftKey);
         toast.success('Problem updated successfully');
         navigate('/');
         } catch (error) {
@@ -134,6 +146,22 @@ function UpdateProblem() {
       }
     };
 
+    const handleRemoveVideo = async () => {
+      if (!existingVideo?.sourceType || existingVideo.sourceType === 'none') return;
+      if (!window.confirm('Remove the current video solution?')) return;
+      try {
+        setVideoSaving(true);
+        await axiosClient.delete(`/video/delete/${problemId}`);
+        setExistingVideo(null);
+        toast.success('Video removed');
+      } catch (err) {
+        console.error(err);
+        toast.error(err.response?.data?.error || 'Failed to remove video');
+      } finally {
+        setVideoSaving(false);
+      }
+    };
+
     useEffect(() => {
         const fetchProblemData = async () => {
           if (!problemId){
@@ -144,6 +172,18 @@ function UpdateProblem() {
               const response = await axiosClient.get(`/problem/problemById/${problemId}`);
               console.log(response.data);
               reset(normalizeProblem(response.data));
+              const savedDraft = localStorage.getItem(draftKey);
+              if (savedDraft) {
+                try {
+                  const parsed = JSON.parse(savedDraft);
+                  if (parsed?.value) {
+                    setDraftData(parsed.value);
+                    setShowDraftPrompt(true);
+                  }
+                } catch {
+                  // ignore malformed drafts
+                }
+              }
               setExistingVideo({
                 sourceType: response.data.videoSourceType || 'none',
                 youtubeUrl: response.data.youtubeUrl || '',
@@ -159,9 +199,46 @@ function UpdateProblem() {
         fetchProblemData();
     }, [problemId, reset])
 
+    useEffect(() => {
+      const subscription = watch((value) => {
+        localStorage.setItem(draftKey, JSON.stringify({ value, savedAt: Date.now() }));
+      });
+      return () => subscription.unsubscribe();
+    }, [watch, draftKey]);
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Update Problem</h1>
+
+      {showDraftPrompt && draftData && (
+        <div className="alert alert-info mb-6 flex items-center justify-between gap-3">
+          <span>A saved draft is available for this problem.</span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="btn btn-xs btn-primary"
+              onClick={() => {
+                reset(draftData);
+                setShowDraftPrompt(false);
+                toast.success('Draft restored');
+              }}
+            >
+              Restore Draft
+            </button>
+            <button
+              type="button"
+              className="btn btn-xs btn-ghost"
+              onClick={() => {
+                localStorage.removeItem(draftKey);
+                setShowDraftPrompt(false);
+                setDraftData(null);
+              }}
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit(
     (data) => {
@@ -173,12 +250,8 @@ function UpdateProblem() {
       console.log(getValues());
     }
   )} className="space-y-6">
-        <AdminProblemAssistant
-          getValues={getValues}
-          setValue={setValue}
-          replaceVisible={replaceVisible}
-          replaceHidden={replaceHidden}
-        />
+        <div className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
+          <div className="space-y-6">
         {/* Basic Information */}
         <div className="card bg-base-100 shadow-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
@@ -228,8 +301,29 @@ function UpdateProblem() {
                 <label className="label">
                   <span className="label-text">Tags</span>
                 </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={tagFilter}
+                    onChange={(e) => setTagFilter(e.target.value)}
+                    placeholder="Search tags"
+                    className="input input-bordered input-sm flex-1"
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-outline"
+                    onClick={() =>
+                      setValue('tags', allTagsSelected ? [] : TAG_OPTIONS, {
+                        shouldValidate: true,
+                        shouldDirty: true
+                      })
+                    }
+                  >
+                    {allTagsSelected ? 'Clear' : 'Select All'}
+                  </button>
+                </div>
                 <div className={`grid grid-cols-2 gap-2 border rounded-lg p-3 ${errors.tags ? 'border-error' : 'border-base-300'}`}>
-                  {availableTags.map((tag) => (
+                  {filteredTags.map((tag) => (
                     <label key={tag} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
@@ -237,7 +331,7 @@ function UpdateProblem() {
                         {...register('tags')}
                         className="checkbox checkbox-primary checkbox-sm"
                       />
-                      <span className="capitalize">{tag.replace('linkedList', 'linked list')}</span>
+                      <span className="capitalize">{tag.replace(/-/g, ' ').replace('linkedList', 'linked list')}</span>
                     </label>
                   ))}
                 </div>
@@ -438,13 +532,21 @@ function UpdateProblem() {
           <h2 className="text-xl font-semibold mb-4">Video Solution</h2>
 
           {existingVideo?.sourceType && existingVideo.sourceType !== 'none' && (
-            <div className="alert alert-info mb-4">
+            <div className="alert alert-info mb-4 flex items-center justify-between gap-3">
               <span>
                 Current video source: {existingVideo.sourceType}
                 {existingVideo.sourceType === 'youtube' && existingVideo.youtubeUrl
                   ? ` (${existingVideo.youtubeUrl})`
                   : ''}
               </span>
+              <button
+                type="button"
+                className="btn btn-xs btn-outline"
+                onClick={handleRemoveVideo}
+                disabled={videoSaving}
+              >
+                Remove Video
+              </button>
             </div>
           )}
 
@@ -520,9 +622,24 @@ function UpdateProblem() {
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary w-full" >
-          Update Problem
+        <button
+          type="submit"
+          className={`btn btn-primary w-full ${(isSubmitting || videoSaving) ? 'loading' : ''}`}
+          disabled={isSubmitting || videoSaving}
+        >
+          {isSubmitting || videoSaving ? 'Saving...' : 'Update Problem'}
         </button>
+          </div>
+
+          <div className="lg:sticky lg:top-6">
+            <AdminProblemAssistant
+              getValues={getValues}
+              setValue={setValue}
+              replaceVisible={replaceVisible}
+              replaceHidden={replaceHidden}
+            />
+          </div>
+        </div>
       </form>
     </div>
   );

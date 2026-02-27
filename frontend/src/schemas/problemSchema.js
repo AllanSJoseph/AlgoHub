@@ -1,10 +1,11 @@
 import {z} from 'zod';
+import { TAG_OPTIONS } from '../constants/tagOptions';
 
 export const problemSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
   difficulty: z.enum(['easy', 'medium', 'hard']),
-  tags: z.array(z.enum(['array', 'linkedList', 'graph', 'dp'])).min(1, 'At least one tag is required'),
+  tags: z.array(z.enum(TAG_OPTIONS)).min(1, 'At least one tag is required'),
   constraints: z.string().optional(),
   inputFormat: z.string().optional(),
   outputFormat: z.string().optional(),

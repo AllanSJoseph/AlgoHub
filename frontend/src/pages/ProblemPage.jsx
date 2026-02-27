@@ -33,7 +33,9 @@ const ProblemPage = () => {
   const [code, setCode] = useState('');
   const [fullCode, setFullCode] = useState('');
   const [markerError, setMarkerError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [runLoading, setRunLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [runResult, setRunResult] = useState(null);
   const [submitResult, setSubmitResult] = useState(null);
   const [activeLeftTab, setActiveLeftTab] = useState('description');
@@ -43,11 +45,12 @@ const ProblemPage = () => {
 
   const runTestCases = runResult?.testCases || [];
   const hasRunTestCases = runTestCases.length > 0;
+  const actionLoading = runLoading || submitLoading;
   
 
  useEffect(() => {
     const fetchProblem = async () => {
-      setLoading(true);
+      setPageLoading(true);
       try {
         
         const response = await axiosClient.get(`/problem/problemById/${problemId}`);
@@ -73,11 +76,11 @@ const ProblemPage = () => {
         setFullCode(initialFullCode);
         setMarkerError(extracted.error || '');
         setCode(codeToSet);
-        setLoading(false);
+        setPageLoading(false);
         
       } catch (error) {
         console.error('Error fetching problem:', error);
-        setLoading(false);
+        setPageLoading(false);
       }
     };
 
@@ -126,13 +129,13 @@ const ProblemPage = () => {
   };
 
   const handleRun = async () => {
-    setLoading(true);
+    setRunLoading(true);
     setRunResult(null);
     
     try {
       if (markerError) {
         setRunResult({ success: false, error: markerError });
-        setLoading(false);
+        setRunLoading(false);
         setActiveRightTab('testcase');
         return;
       }
@@ -140,7 +143,7 @@ const ProblemPage = () => {
       const mergeResult = mergeUserCode(fullCode, code);
       if (mergeResult.error) {
         setRunResult({ success: false, error: mergeResult.error });
-        setLoading(false);
+        setRunLoading(false);
         setActiveRightTab('testcase');
         return;
       }
@@ -151,7 +154,7 @@ const ProblemPage = () => {
       });
 
       setRunResult(response.data);
-      setLoading(false);
+      setRunLoading(false);
       setActiveRightTab('testcase');
       
     } catch (error) {
@@ -160,13 +163,13 @@ const ProblemPage = () => {
         success: false,
         error: 'Internal server error'
       });
-      setLoading(false);
+      setRunLoading(false);
       setActiveRightTab('testcase');
     }
   };
 
   const handleSubmitCode = async () => {
-    setLoading(true);
+    setSubmitLoading(true);
     setSubmitResult(null);
     
     try {
@@ -179,7 +182,7 @@ const ProblemPage = () => {
             runtime: 0,
             memory: 0
           });
-          setLoading(false);
+          setSubmitLoading(false);
           setActiveRightTab('result');
           return;
         }
@@ -194,7 +197,7 @@ const ProblemPage = () => {
             runtime: 0,
             memory: 0
           });
-          setLoading(false);
+          setSubmitLoading(false);
           setActiveRightTab('result');
           return;
         }
@@ -205,13 +208,13 @@ const ProblemPage = () => {
       });
 
        setSubmitResult(response.data);
-       setLoading(false);
+       setSubmitLoading(false);
        setActiveRightTab('result');
       
     } catch (error) {
       console.error('Error submitting code:', error);
       setSubmitResult(null);
-      setLoading(false);
+      setSubmitLoading(false);
       setActiveRightTab('result');
     }
   };
@@ -235,7 +238,7 @@ const ProblemPage = () => {
     }
   };
 
-  if (loading && !problem) {
+  if (pageLoading && !problem) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <span className="loading loading-spinner loading-lg"></span>
@@ -443,6 +446,12 @@ const ProblemPage = () => {
 
         {/* Right Content */}
         <div className="flex-1 flex flex-col min-h-0">
+          {actionLoading && (
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-base-300 text-sm text-base-content/70">
+              <span className="loading loading-spinner loading-sm"></span>
+              <span>{runLoading ? 'Running code...' : 'Submitting solution...'}</span>
+            </div>
+          )}
           {activeRightTab === 'code' && (
             <div className="flex-1 flex flex-col min-h-0">
               {/* Language Selector */}
@@ -509,16 +518,16 @@ const ProblemPage = () => {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    className={`btn btn-outline btn-sm ${loading ? 'loading' : ''}`}
+                    className={`btn btn-outline btn-sm ${runLoading ? 'loading' : ''}`}
                     onClick={handleRun}
-                    disabled={loading}
+                    disabled={pageLoading || runLoading || submitLoading}
                   >
                     Run
                   </button>
                   <button
-                    className={`btn btn-primary btn-sm ${loading ? 'loading' : ''}`}
+                    className={`btn btn-primary btn-sm ${submitLoading ? 'loading' : ''}`}
                     onClick={handleSubmitCode}
-                    disabled={loading}
+                    disabled={pageLoading || runLoading || submitLoading}
                   >
                     Submit
                   </button>

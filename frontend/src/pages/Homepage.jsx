@@ -3,6 +3,7 @@ import { NavLink } from 'react-router'; // Fixed import
 import { useSelector } from 'react-redux';
 import axiosClient from '../utils/axiosClient';
 import { motion } from 'framer-motion';
+import { TAG_OPTIONS } from '../constants/tagOptions';
 
 const normalizeTags = (tags) => (Array.isArray(tags) ? tags : tags ? [tags] : []);
 
@@ -155,10 +156,11 @@ function Homepage() {
             onChange={(e) => setFilters({...filters, tag: e.target.value})}
           >
             <option value="all">All Tags</option>
-            <option value="array">Array</option>
-            <option value="linkedList">Linked List</option>
-            <option value="graph">Graph</option>
-            <option value="dp">DP</option>
+            {TAG_OPTIONS.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag.replace(/-/g, ' ').replace('linkedList', 'linked list')}
+              </option>
+            ))}
           </select>
         </div>
 

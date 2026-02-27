@@ -41,6 +41,10 @@ function AdminProblemAssistant({
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState(null);
   const [error, setError] = useState('');
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeSuggestions, setCodeSuggestions] = useState(null);
+  const [codeError, setCodeError] = useState('');
+  const languageOrder = ['C++', 'Java', 'JavaScript', 'Python'];
 
   const runAssistant = async (action) => {
     try {
@@ -62,6 +66,58 @@ function AdminProblemAssistant({
       toast.error(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateCodeTemplates = async () => {
+    try {
+      setCodeLoading(true);
+      setCodeError('');
+      const payload = getValues();
+      const response = await axiosClient.post('/ai/suggestCodeTemplates', {
+        title: payload.title,
+        description: payload.description,
+        difficulty: payload.difficulty,
+        tags: payload.tags,
+        testcases: payload.visibleTestCases
+      });
+      const data = response.data?.data || response.data;
+      setCodeSuggestions(data);
+    } catch (err) {
+      console.error(err);
+      const message = err.response?.data?.message || 'Failed to generate code templates';
+      setCodeError(message);
+      toast.error(message);
+    } finally {
+      setCodeLoading(false);
+    }
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text || '');
+      toast.success('Copied to clipboard');
+    } catch {
+      toast.error('Copy failed');
+    }
+  };
+
+  const applyCodeForLanguage = (language) => {
+    const startEntry = codeSuggestions?.startCode?.find(
+      (entry) => entry.language?.toLowerCase() === language.toLowerCase()
+    );
+    const refEntry = codeSuggestions?.referenceSolution?.find(
+      (entry) => entry.language?.toLowerCase() === language.toLowerCase()
+    );
+    const index = languageOrder.findIndex(
+      (lang) => lang.toLowerCase() === language.toLowerCase()
+    );
+    if (index === -1) return;
+    if (startEntry?.initialCode) {
+      setValue(`startCode.${index}.initialCode`, startEntry.initialCode, { shouldDirty: true });
+    }
+    if (refEntry?.completeCode) {
+      setValue(`referenceSolution.${index}.completeCode`, refEntry.completeCode, { shouldDirty: true });
     }
   };
 
@@ -115,6 +171,14 @@ function AdminProblemAssistant({
         >
           Validate Reference Solution
         </button>
+        <button
+          type="button"
+          onClick={generateCodeTemplates}
+          className={`btn btn-outline ${codeLoading ? 'loading' : ''}`}
+          disabled={codeLoading}
+        >
+          Generate Code Templates
+        </button>
       </div>
 
       {error && (
@@ -123,7 +187,27 @@ function AdminProblemAssistant({
         </div>
       )}
 
-      {!suggestions && !loading && (
+      {codeError && (
+        <div className="alert alert-error mb-4">
+          <span>{codeError}</span>
+        </div>
+      )}
+
+      {loading && (
+        <div className="flex items-center gap-3 text-sm text-base-content/70 mb-4">
+          <span className="loading loading-spinner loading-sm"></span>
+          <span>Analyzing problem and preparing suggestions...</span>
+        </div>
+      )}
+
+      {codeLoading && (
+        <div className="flex items-center gap-3 text-sm text-base-content/70 mb-4">
+          <span className="loading loading-spinner loading-sm"></span>
+          <span>Generating code templates...</span>
+        </div>
+      )}
+
+      {!suggestions && !codeSuggestions && !loading && !codeLoading && (
         <div className="text-sm text-base-content/60">
           Run the assistant to see improvement suggestions.
         </div>
@@ -238,6 +322,78 @@ function AdminProblemAssistant({
               </ul>
             </div>
           )}
+        </div>
+      )}
+
+      {codeSuggestions && (
+        <div className="mt-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">Code Template Suggestions</h3>
+            <button
+              type="button"
+              className="btn btn-xs btn-outline"
+              onClick={() => copyToClipboard(JSON.stringify(codeSuggestions, null, 2))}
+            >
+              Copy JSON
+            </button>
+          </div>
+          {languageOrder.map((language) => {
+            const startEntry = codeSuggestions?.startCode?.find(
+              (entry) => entry.language?.toLowerCase() === language.toLowerCase()
+            );
+            const refEntry = codeSuggestions?.referenceSolution?.find(
+              (entry) => entry.language?.toLowerCase() === language.toLowerCase()
+            );
+            if (!startEntry && !refEntry) return null;
+            return (
+              <div key={language} className="border border-base-300 rounded-lg p-3 bg-base-200">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <h4 className="font-medium">{language}</h4>
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-primary"
+                    onClick={() => applyCodeForLanguage(language)}
+                  >
+                    Apply to Form
+                  </button>
+                </div>
+                {startEntry?.initialCode && (
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between mb-1 text-xs uppercase tracking-wide text-base-content/60">
+                      <span>Starter Code</span>
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-ghost"
+                        onClick={() => copyToClipboard(startEntry.initialCode)}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <pre className="bg-base-100 p-3 rounded text-xs overflow-x-auto">
+                      <code>{startEntry.initialCode}</code>
+                    </pre>
+                  </div>
+                )}
+                {refEntry?.completeCode && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1 text-xs uppercase tracking-wide text-base-content/60">
+                      <span>Reference Solution</span>
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-ghost"
+                        onClick={() => copyToClipboard(refEntry.completeCode)}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <pre className="bg-base-100 p-3 rounded text-xs overflow-x-auto">
+                      <code>{refEntry.completeCode}</code>
+                    </pre>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
