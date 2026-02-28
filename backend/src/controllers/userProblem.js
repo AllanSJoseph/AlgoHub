@@ -18,6 +18,19 @@ const normalizeTags = (tags) => {
   return [];
 };
 
+const findMissingMarkers = (startCode = []) => {
+  const missing = [];
+  for (const entry of startCode || []) {
+    const code = entry?.initialCode || "";
+    const hasMarkers =
+      code.includes("VISIBLE_CODE_START") && code.includes("VISIBLE_CODE_END");
+    if (!hasMarkers) {
+      missing.push(entry?.language || "unknown");
+    }
+  }
+  return missing;
+};
+
 const createProblem = async (req,res)=>{
    
   // API request to authenticate user:
@@ -28,7 +41,14 @@ const createProblem = async (req,res)=>{
 
 
     try{
-       
+      
+      const missingMarkers = findMissingMarkers(startCode);
+      if (missingMarkers.length) {
+        return res.status(400).json({
+          message: `Starter code must include VISIBLE_CODE_START and VISIBLE_CODE_END markers for: ${missingMarkers.join(", ")}`
+        });
+      }
+
       for(const {language,completeCode} of referenceSolution){
          
 
@@ -93,16 +113,23 @@ const createProblem = async (req,res)=>{
 const updateProblem = async (req,res)=>{
     
   const {id} = req.params;
-  const {title,description,difficulty,tags,
-    visibleTestCases,hiddenTestCases,startCode,
-    referenceSolution, problemCreator
-   } = req.body;
+    const {title,description,difficulty,tags,
+      visibleTestCases,hiddenTestCases,startCode,
+      referenceSolution, problemCreator
+     } = req.body;
 
   try{
 
      if(!id){
       return res.status(400).send("Missing ID Field");
      }
+
+    const missingMarkers = findMissingMarkers(startCode);
+    if (missingMarkers.length) {
+      return res.status(400).json({
+        message: `Starter code must include VISIBLE_CODE_START and VISIBLE_CODE_END markers for: ${missingMarkers.join(", ")}`
+      });
+    }
 
     const DsaProblem =  await Problem.findById(id);
     if(!DsaProblem)

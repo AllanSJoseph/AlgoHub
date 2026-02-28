@@ -1,6 +1,5 @@
 import { NavLink, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Moon, Sun } from "lucide-react";
 import { logoutUser } from "../authSlice";
 
 function Navbar({ theme, onToggleTheme }) {
@@ -95,21 +94,17 @@ function Navbar({ theme, onToggleTheme }) {
 
       <div className="navbar-end">
         <button
-          className="theme-switch"
-          data-checked={theme === "brutal-dark"}
+          className="rounded-full border border-base-300 bg-base-100 p-1"
           onClick={toggleTheme}
           aria-label="Toggle theme"
-          aria-checked={theme === "brutal-dark"}
-          role="switch"
           type="button"
         >
-          <span className="theme-icon theme-icon-left">
-            <Sun size={12} />
-          </span>
-          <span className="theme-icon theme-icon-right">
-            <Moon size={12} />
-          </span>
-          <span className="theme-knob" />
+          <dotlottie-wc
+            src="https://lottie.host/488aa86a-6a13-4751-b966-e3ddf627a383/zJsYFI8PZn.lottie"
+            style={{ width: '36px', height: '36px' }}
+            autoplay
+            loop
+          ></dotlottie-wc>
         </button>
         {isAuthenticated ? (
           <div className="dropdown dropdown-end">

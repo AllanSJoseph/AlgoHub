@@ -57,7 +57,7 @@ const localVideoStorage = multer.diskStorage({
 
 const localVideoUpload = multer({
   storage: localVideoStorage,
-  limits: { fileSize: 500 * 1024 * 1024 },
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB guard
   fileFilter: (req, file, cb) => {
     if (file.mimetype && file.mimetype.startsWith('video/')) {
       cb(null, true);
@@ -250,14 +250,16 @@ const uploadLocalVideo = async (req, res) => {
     const userId = req.result._id;
     const file = req.file;
 
-    if (!file) {
-      return res.status(400).json({ error: 'Video file is required' });
-    }
+  if (!file) {
+    return res.status(400).json({ error: 'Video file is required' });
+  }
 
-    const problem = await Problem.findById(problemId);
-    if (!problem) {
-      return res.status(404).json({ error: 'Problem not found' });
-    }
+    // Note: local files currently persist until explicitly deleted; schedule periodic cleanup if needed.
+
+  const problem = await Problem.findById(problemId);
+  if (!problem) {
+    return res.status(404).json({ error: 'Problem not found' });
+  }
 
     const existingVideo = await SolutionVideo.findOne({ problemId });
     await cleanupExistingVideo(existingVideo);

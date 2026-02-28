@@ -195,7 +195,6 @@ const suggestCodeTemplates = async (req, res) => {
     }
     Note: For 'referenceSolution', the user section should contain the actual logic instead of a comment.
         `
-
         const result = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: prompt,
@@ -204,10 +203,17 @@ const suggestCodeTemplates = async (req, res) => {
             }
         });
 
-        const responseText = result.text;
-
-        const cleanJson = responseText.replace(/```json|```/g, "").trim();
-        const suggestions = JSON.parse(cleanJson);
+        const responseText = result.text || "";
+        let suggestions;
+        try {
+            const cleanJson = responseText.replace(/```json|```/g, "").trim();
+            suggestions = JSON.parse(cleanJson);
+        } catch (parseErr) {
+            console.error("Failed to parse code template suggestions:", parseErr, responseText);
+            return res.status(502).json({
+                message: "AI returned invalid JSON for code templates. Please try again."
+            });
+        }
 
         res.status(200).json({
             success: true,
@@ -215,6 +221,7 @@ const suggestCodeTemplates = async (req, res) => {
         });
 
     } catch (err) {
+        console.error(err);
         res.status(500).json({
             message: "Internal Server Error"
         });

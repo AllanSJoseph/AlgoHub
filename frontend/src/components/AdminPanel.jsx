@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import AdminProblemAssistant from './AdminProblemAssistant';
 import { useEffect, useState } from 'react';
 import { TAG_OPTIONS } from '../constants/tagOptions';
+import LoadingLottie from './LoadingLottie';
 
 // Zod schema matching the problem schema
 const problemSchema = z.object({
@@ -134,7 +135,13 @@ function AdminPanel() {
       localStorage.setItem(draftKey, JSON.stringify({ value, savedAt: Date.now() }));
     });
     return () => subscription.unsubscribe();
-  }, [watch]);
+  }, [watch, draftKey]);
+
+  const clearDraft = () => {
+    localStorage.removeItem(draftKey);
+    reset(defaultValues);
+    toast.success('Draft cleared');
+  };
 
   const onSubmit = async (data) => {
     console.log('Form data submitted:', data);
@@ -193,6 +200,15 @@ function AdminPanel() {
       <h1 className="text-3xl font-bold mb-6">Create New Problem</h1>
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            className="btn btn-sm btn-outline"
+            onClick={clearDraft}
+          >
+            Clear Draft
+          </button>
+        </div>
         <div className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
           <div className="space-y-6">
             {/* Basic Information */}
@@ -291,7 +307,7 @@ function AdminPanel() {
               <textarea
                 {...register('constraints')}
                 className="textarea textarea-bordered h-24"
-                placeholder="e.g., 1 ≤ n ≤ 10^5"
+                placeholder="e.g., 1 <= n <= 1e5"
               />
             </div>
 
@@ -561,6 +577,9 @@ function AdminPanel() {
               replaceVisible={replaceVisible}
               replaceHidden={replaceHidden}
             />
+            {(isSubmitting || videoSaving) && (
+              <LoadingLottie label="Saving problem..." size={140} />
+            )}
           </div>
         </div>
       </form>
@@ -569,3 +588,4 @@ function AdminPanel() {
 }
 
 export default AdminPanel;
+

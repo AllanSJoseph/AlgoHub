@@ -18,5 +18,22 @@ export const TAG_OPTIONS = [
   'math',
   'sorting',
   'prefix-sum',
-  'design'
+  'design',
+  'recursion',
+  'bfs',
+  'dfs',
+  'union-find',
+  'disjoint-set',
+  'segment-tree',
+  'fenwick-tree',
+  'graph-shortest-path',
+  'topological-sort',
+  'trie',
+  'geometry',
+  'number-theory',
+  'combinatorics',
+  'probability',
+  'game-theory',
+  'matrix',
+  'simulation'
 ];

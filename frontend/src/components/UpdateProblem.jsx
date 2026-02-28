@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import AdminProblemAssistant from './AdminProblemAssistant';
 import { TAG_OPTIONS } from '../constants/tagOptions';
+import LoadingLottie from './LoadingLottie';
 
 function UpdateProblem() {
     const [loading, setLoading] = useState(false);
@@ -200,11 +201,12 @@ function UpdateProblem() {
     }, [problemId, reset])
 
     useEffect(() => {
+      if (!problemId) return;
       const subscription = watch((value) => {
         localStorage.setItem(draftKey, JSON.stringify({ value, savedAt: Date.now() }));
       });
       return () => subscription.unsubscribe();
-    }, [watch, draftKey]);
+    }, [watch, draftKey, problemId]);
 
   return (
     <div className="container mx-auto p-6">
@@ -237,6 +239,12 @@ function UpdateProblem() {
               Discard
             </button>
           </div>
+        </div>
+      )}
+
+      {loading && (
+        <div className="mb-6">
+          <LoadingLottie label="Loading problem data..." />
         </div>
       )}
       
@@ -348,7 +356,7 @@ function UpdateProblem() {
               <textarea
                 {...register('constraints')}
                 className="textarea textarea-bordered h-24"
-                placeholder="e.g., 1 ≤ n ≤ 10^5"
+                placeholder="e.g., 1 <= n <= 1e5"
               />
             </div>
 
@@ -638,6 +646,9 @@ function UpdateProblem() {
               replaceVisible={replaceVisible}
               replaceHidden={replaceHidden}
             />
+            {(isSubmitting || videoSaving) && (
+              <LoadingLottie label="Saving changes..." size={140} />
+            )}
           </div>
         </div>
       </form>
@@ -646,3 +657,4 @@ function UpdateProblem() {
 }
 
 export default UpdateProblem;
+

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axiosClient from '../utils/axiosClient';
 import { toast } from 'react-hot-toast';
+import LoadingLottie from './LoadingLottie';
 
 const normalizeTags = (tags) => {
   if (Array.isArray(tags)) return tags.filter(Boolean);
@@ -194,17 +195,11 @@ function AdminProblemAssistant({
       )}
 
       {loading && (
-        <div className="flex items-center gap-3 text-sm text-base-content/70 mb-4">
-          <span className="loading loading-spinner loading-sm"></span>
-          <span>Analyzing problem and preparing suggestions...</span>
-        </div>
+        <LoadingLottie label="Analyzing problem and preparing suggestions..." size={120} />
       )}
 
       {codeLoading && (
-        <div className="flex items-center gap-3 text-sm text-base-content/70 mb-4">
-          <span className="loading loading-spinner loading-sm"></span>
-          <span>Generating code templates...</span>
-        </div>
+        <LoadingLottie label="Generating code templates..." size={120} />
       )}
 
       {!suggestions && !codeSuggestions && !loading && !codeLoading && (

@@ -5,6 +5,8 @@ import axiosClient from "../utils/axiosClient"
 import SubmissionHistory from "../components/SubmissionHistory"
 import ChatAi from '../components/ChatAi';
 import Editorial from '../components/Editorial';
+import LoadingLottie from '../components/LoadingLottie';
+import { toast } from 'react-hot-toast';
 import { extractVisibleCode, mergeUserCode } from '../utils/codeTemplate';
 
 const langMap = {
@@ -80,6 +82,7 @@ const ProblemPage = () => {
         
       } catch (error) {
         console.error('Error fetching problem:', error);
+        toast.error('Failed to load problem. Please retry.');
         setPageLoading(false);
       }
     };
@@ -159,6 +162,7 @@ const ProblemPage = () => {
       
     } catch (error) {
       console.error('Error running code:', error);
+      toast.error('Run failed. Please try again.');
       setRunResult({
         success: false,
         error: 'Internal server error'
@@ -213,6 +217,7 @@ const ProblemPage = () => {
       
     } catch (error) {
       console.error('Error submitting code:', error);
+      toast.error('Submit failed. Please try again.');
       setSubmitResult(null);
       setSubmitLoading(false);
       setActiveRightTab('result');
@@ -241,7 +246,7 @@ const ProblemPage = () => {
   if (pageLoading && !problem) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
+        <LoadingLottie label="Loading problem..." size={160} />
       </div>
     );
   }
@@ -447,9 +452,8 @@ const ProblemPage = () => {
         {/* Right Content */}
         <div className="flex-1 flex flex-col min-h-0">
           {actionLoading && (
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-base-300 text-sm text-base-content/70">
-              <span className="loading loading-spinner loading-sm"></span>
-              <span>{runLoading ? 'Running code...' : 'Submitting solution...'}</span>
+            <div className="border-b border-base-300 px-4 py-3">
+              <LoadingLottie label={runLoading ? 'Running code...' : 'Submitting solution...'} size={110} />
             </div>
           )}
           {activeRightTab === 'code' && (

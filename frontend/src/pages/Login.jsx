@@ -14,6 +14,7 @@ const loginSchema = z.object({
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
@@ -26,7 +27,9 @@ function Login() {
   useEffect(() => {
     dispatch(clearError());
     if (isAuthenticated) {
-      navigate('/');
+      setShowSuccess(true);
+      const timer = setTimeout(() => navigate('/'), 900);
+      return () => clearTimeout(timer);
     }
   }, [dispatch, isAuthenticated, navigate]);
 
@@ -39,25 +42,12 @@ function Login() {
       <div className="auth-card grid md:grid-cols-2">
         <div className="auth-panel p-8 md:p-12 flex flex-col items-center justify-center text-center gap-6">
           <div className="text-xs tracking-[0.35em] uppercase">AlgoHub</div>
-          <div className="auth-rocket w-40 h-40">
-            <svg viewBox="0 0 200 200" className="w-full h-full">
-              <defs>
-                <linearGradient id="rocketGlowLogin" x1="0" x2="1" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#ffcf70" />
-                  <stop offset="100%" stopColor="#ff6bb2" />
-                </linearGradient>
-              </defs>
-              <circle cx="100" cy="100" r="70" fill="rgba(255,255,255,0.08)" />
-              <path d="M100 32c22 18 32 42 32 72 0 30-10 54-32 72-22-18-32-42-32-72 0-30 10-54 32-72z" fill="#f5f1ff" />
-              <circle cx="100" cy="92" r="16" fill="#3b1c6e" />
-              <circle cx="100" cy="92" r="8" fill="#7cd3ff" />
-              <path d="M70 132l-22 18c-6 4-8 10-6 16 8-4 18-6 28-4l8-30z" fill="#e7dcff" />
-              <path d="M130 132l22 18c6 4 8 10 6 16-8-4-18-6-28-4l-8-30z" fill="#e7dcff" />
-              <path className="rocket-flame" d="M92 150h16l-8 26z" fill="url(#rocketGlowLogin)" />
-              <circle className="rocket-spark" cx="88" cy="176" r="2.5" fill="#ffd37a" />
-              <circle className="rocket-spark" cx="112" cy="180" r="2" fill="#ff7ab8" />
-            </svg>
-          </div>
+          <dotlottie-wc
+            src="https://lottie.host/a8f0a638-0939-43de-ba0b-56768f929320/c32uESuxMw.lottie"
+            style={{ width: '220px', height: '220px' }}
+            autoplay
+            loop
+          ></dotlottie-wc>
           <div className="auth-code">
             <span className="code-line">function solve(input) &#123;</span>
             <span className="code-line delay-1">  return input === reverse(input);</span>
@@ -145,7 +135,19 @@ function Login() {
             </div>
           </form>
         </div>
-      </div>
+      {showSuccess && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-base-100 rounded-xl p-6 shadow-lg flex flex-col items-center gap-3">
+            <dotlottie-wc
+              src="https://lottie.host/ef016b1c-ede0-4270-9caf-eba5bb793f02/yVEovMUWcZ.lottie"
+              style={{ width: '220px', height: '220px' }}
+              autoplay
+              loop
+            ></dotlottie-wc>
+            <p className="text-sm text-base-content/70">Login successful. Redirecting...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

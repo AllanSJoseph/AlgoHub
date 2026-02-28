@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axiosClient from '../utils/axiosClient';
 import { toast } from 'react-hot-toast';
+import LoadingLottie from '../components/LoadingLottie';
 
 const presets = [
   'DevOps Engineer',
@@ -160,6 +161,7 @@ function Roadmap() {
             <span>{error}</span>
           </div>
         )}
+        {loading && <LoadingLottie label="Generating roadmap..." size={160} />}
       </section>
 
       {roadmapData && (
