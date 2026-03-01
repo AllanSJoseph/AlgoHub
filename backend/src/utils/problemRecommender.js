@@ -30,5 +30,9 @@ async function recommendProblems(user) {
             }
         },
         { $sample: { size: 10 }}
-    ])
+    ]);
+
+    return recommendedProblems;
 }
+
+module.exports = { recommendProblems };

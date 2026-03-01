@@ -11,7 +11,9 @@ function Homepage() {
   const { user } = useSelector((state) => state.auth);
   const [problems, setProblems] = useState([]);
   const [solvedProblems, setSolvedProblems] = useState([]);
+  const [recommendedProblems, setRecommendedProblems] = useState([]);
   const [loadingProblems, setLoadingProblems] = useState(true);
+  const [loadingRecommended, setLoadingRecommended] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     difficulty: 'all',
@@ -19,6 +21,20 @@ function Homepage() {
     status: 'all',
     search: ''
   });
+
+  const fetchRecommendedProblems =  async () => {
+    try {
+      setLoadingRecommended(true);
+
+      const { data } = await axiosClient.get("/problem/recommended");
+
+      setRecommendedProblems(data);
+    } catch (err) {
+      console.error("Recommendation error: ", err);
+    } finally {
+      setLoadingRecommended(false);
+    }
+  };
 
   useEffect(() => {
     const fetchProblems = async () => {
@@ -44,8 +60,13 @@ function Homepage() {
       }
     };
 
+
+
     fetchProblems();
-    if (user) fetchSolvedProblems();
+    if (user){ 
+      fetchSolvedProblems();
+      fetchRecommendedProblems();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -118,6 +139,51 @@ function Homepage() {
           </div>
         </div>
       </motion.section>
+
+      {user && recommendedProblems.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">
+              Recommended For You
+            </h2>
+
+            {loadingRecommended ? (
+              <span className="loading loading-spinner"></span>
+            ) : (
+              <div className="grid gap-4">
+                {recommendedProblems.map(problem => (
+                  <div
+                    key={problem._id}
+                    className="card bg-base-100 border shadow"
+                  >
+                    <div className="card-body">
+                      <NavLink
+                        to={`/problem/${problem._id}`}
+                        className="card-title hover:text-primary"
+                      >
+                        {problem.title}
+                      </NavLink>
+
+                      <div className="flex gap-2 flex-wrap">
+                        <div className={`badge ${getDifficultyBadgeColor(problem.difficulty)}`}>
+                          {problem.difficulty}
+                        </div>
+
+                        {normalizeTags(problem.tags).map(tag => (
+                          <div
+                            key={tag}
+                            className="badge badge-info badge-outline"
+                          >
+                            {tag}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Filters */}
         <div id="problems" className="flex flex-wrap gap-4 mb-6">

@@ -1,4 +1,5 @@
 const {getLanguageById,submitBatch,submitToken} = require("../utils/problemUtility");
+const {recommendProblems} = require("../utils/problemRecommender");
 const Problem = require("../models/problem");
 const User = require("../models/user");
 const Submission = require("../models/submission");
@@ -268,6 +269,18 @@ const getAllProblem = async(req,res)=>{
   }
 }
 
+const getRecommendedProblem = async(req, res) => {
+  try {
+    const user = req.result._id;
+  
+    const problems = await recommendProblems(user);
+
+    res.json(problems);
+  } catch (err) {
+    res.status(500).send("Error: " + err);
+  }
+}
+
 
 const solvedAllProblembyUser =  async(req,res)=>{
    
@@ -371,6 +384,6 @@ const testProblemCode = async (req, res) => {
   }
 }
 
-module.exports = {createProblem,updateProblem,deleteProblem,getProblemById,getAllProblem,solvedAllProblembyUser,submittedProblem, testProblemCode};
+module.exports = { createProblem, updateProblem, deleteProblem, getProblemById, getAllProblem, getRecommendedProblem, solvedAllProblembyUser, submittedProblem, testProblemCode};
 
 
