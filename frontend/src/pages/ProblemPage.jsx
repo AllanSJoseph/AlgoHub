@@ -6,6 +6,7 @@ import SubmissionHistory from "../components/SubmissionHistory"
 import ChatAi from '../components/ChatAi';
 import Editorial from '../components/Editorial';
 import LoadingLottie from '../components/LoadingLottie';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import { toast } from 'react-hot-toast';
 import { extractVisibleCode, mergeUserCode } from '../utils/codeTemplate';
 
@@ -314,7 +315,7 @@ const ProblemPage = () => {
 
                   <div className="prose max-w-none">
                     <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {problem.description}
+                      <MarkdownRenderer content={problem.description} /> 
                     </div>
                   </div>
 

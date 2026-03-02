@@ -13,6 +13,7 @@ import LoadingLottie from './LoadingLottie';
 
 function UpdateProblem() {
     const [loading, setLoading] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
     const [videoSource, setVideoSource] = useState('none');
     const [youtubeUrl, setYoutubeUrl] = useState('');
     const [localVideoFile, setLocalVideoFile] = useState(null);
@@ -104,16 +105,19 @@ function UpdateProblem() {
     );
 
     const onSubmit = async (data) => {
-        console.log('Form data submitted:', data);
-        try {
+      // console.log('Form data submitted:', data);
+      try {
+        setIsUpdating(true);
         await axiosClient.put(`/problem/update/${problemId}`, data);
         await handleVideoSave(problemId);
         localStorage.removeItem(draftKey);
         toast.success('Problem updated successfully');
         navigate('/');
-        } catch (error) {
+      } catch (error) {
         toast.error(error.response?.data?.message || error.message || 'Failed to update problem');
-        }
+      } finally {
+        setIsUpdating(false);
+      }
     };
 
     const handleVideoSave = async (id) => {
@@ -246,6 +250,14 @@ function UpdateProblem() {
         <div className="mb-6">
           <LoadingLottie label="Loading problem data..." />
         </div>
+      )}
+
+      {isUpdating && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="px-6 py-4 flex gap-3 items-center">
+            <LoadingLottie label="Updating problem data..." />
+          </div>
+      </div>
       )}
       
       <form onSubmit={handleSubmit(

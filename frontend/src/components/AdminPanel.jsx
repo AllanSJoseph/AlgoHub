@@ -52,6 +52,7 @@ function AdminPanel() {
   const [videoSource, setVideoSource] = useState('none');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [localVideoFile, setLocalVideoFile] = useState(null);
+  const [isCreating, setisCreating] = useState(false);
   const [videoSaving, setVideoSaving] = useState(false);
   const [tagFilter, setTagFilter] = useState('');
   const draftKey = 'admin_problem_draft_create';
@@ -146,6 +147,7 @@ function AdminPanel() {
   const onSubmit = async (data) => {
     console.log('Form data submitted:', data);
     try {
+      setisCreating(true);
       const response = await axiosClient.post('/problem/create', data);
       const problemId = response.data?.problemId;
 
@@ -157,6 +159,8 @@ function AdminPanel() {
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || 'Failed to create problem');
+    } finally {
+      setisCreating(false);
     }
   };
 
@@ -197,6 +201,15 @@ function AdminPanel() {
 
   return (
     <div className="container mx-auto p-6">
+
+      {isCreating && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="px-6 py-4 flex gap-3 items-center">
+            <LoadingLottie label="Creating problem..." />
+          </div>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-6">Create New Problem</h1>
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

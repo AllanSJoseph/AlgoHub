@@ -45,7 +45,7 @@ function AdminProblemAssistant({
   const [codeLoading, setCodeLoading] = useState(false);
   const [codeSuggestions, setCodeSuggestions] = useState(null);
   const [codeError, setCodeError] = useState('');
-  const languageOrder = ['C++', 'Java', 'JavaScript', 'Python'];
+  const languageOrder = ['Cpp', 'Java', 'JavaScript', 'Python'];
 
   const runAssistant = async (action) => {
     try {
