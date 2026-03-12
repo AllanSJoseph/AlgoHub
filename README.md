@@ -55,26 +55,28 @@ GEMINI_KEY=your_gemini_api_key
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
 
+# 🧪 Setup Instructions
+> It is recommended to use Linux (Ubuntu 20.04 of 22.04) to run this project if you are setting up via docker which includes self-hosted judge0 environment.
 
-🧪 Setup Instructions
-# Clone repository
+## Clone repository
 git clone https://github.com/your-username/AlgoHub.git
 cd AlgoHub
 
-# Install server dependencies
+## Install server dependencies
 cd server
 npm install
 
-# Install client dependencies
+## Install client dependencies
 cd ../client
 npm install
 
-# Run backend
+## Run backend
 cd ../server
 npm run dev
 
-# Run frontend
+## Run frontend
 cd ../client
 npm start
 

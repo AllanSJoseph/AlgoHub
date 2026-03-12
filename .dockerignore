@@ -1,0 +1,9 @@
+node_modules
+
+.vscode
+.idea
+
+.env
+.env.development
+.env.example
+.env.local
