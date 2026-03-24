@@ -39,7 +39,7 @@ const options = {
   method: 'POST',
   url: submissionUrl,    //http://localhost:2358/submissions/batch
   params: {
-    base64_encoded: 'true'
+    base64_encoded: 'false'
   },
   data: {
     submissions
