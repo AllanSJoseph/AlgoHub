@@ -9,14 +9,14 @@ x-logging:
 
 services:
   frontend:
-    build: ./frontend
+    image: allansjoseph/algohub-frontend
     ports:
       - "5000:80"
     depends_on:
       - backend
   
   backend:
-    build: ./backend
+    image: allansjoseph/algohub-backend
     ports:
       - "3000:3000"
     env_file:

@@ -3,7 +3,7 @@ node_modules
 .vscode
 .idea
 
+Dockerfile
+
 .env
-.env.development
-.env.example
-.env.local
+.env.*
