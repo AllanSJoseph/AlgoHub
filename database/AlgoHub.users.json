@@ -1,0 +1,17 @@
+[{
+  "_id": {
+    "$oid": "697dd50217e6fa33ef4b20e1"
+  },
+  "firstName": "Admin",
+  "emailId": "admin@algohub.com",
+  "role": "admin",
+  "problemSolved": [],
+  "password": "$2b$10$uYDqvONIQcLZmbS7iZFhveXyqsdKe1k/LYzvNGHB/t/ToDlZ/0ZKS",
+  "createdAt": {
+    "$date": "2026-01-31T10:10:10.341Z"
+  },
+  "updatedAt": {
+    "$date": "2026-03-22T18:46:59.567Z"
+  },
+  "__v": 4
+}]
