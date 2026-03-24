@@ -557,9 +557,9 @@ const ProblemPage = () => {
                           {hasRunTestCases ? runTestCases.map((tc, i) => (
                             <div key={i} className="bg-base-100 p-3 rounded text-xs">
                               <div className="font-mono">
-                                <div><strong>Input:</strong> {tc.stdin}</div>
-                                <div><strong>Expected:</strong> {tc.expected_output}</div>
-                                <div><strong>Output:</strong> {tc.stdout}</div>
+                                <div className='text-primary-content'><strong>Input:</strong> {tc.stdin}</div>
+                                <div className='text-primary-content'><strong>Expected:</strong> {tc.expected_output}</div>
+                                <div className='text-primary-content'><strong>Output:</strong> {tc.stdout}</div>
                                 <div className={'text-green-600'}>
                                   {'Passed'}
                                 </div>
