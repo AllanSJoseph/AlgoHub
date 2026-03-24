@@ -22,7 +22,6 @@ const videoSchema = new Schema({
     required: function () {
       return this.sourceType === 'cloudinary';
     },
-    unique: true,
     sparse: true
   },
   secureUrl: {
